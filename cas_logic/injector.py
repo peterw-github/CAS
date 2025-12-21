@@ -18,18 +18,16 @@ def send_prompt(message_text):
         wait = WebDriverWait(driver, 5)  # Smart wait up to 5 seconds
 
         # 1. Find Text Area (ROBUST selector)
-        # Using the specific ARIA label so we don't type into the wrong box
         textarea = wait.until(EC.element_to_be_clickable(
             (By.CSS_SELECTOR, "textarea[aria-label='Enter a prompt']")
         ))
 
-        # 2. Focus and Type (YOUR logic - excellent)
+        # 2. Focus and Type
         textarea.click()
         textarea.send_keys(Keys.END)
-        textarea.send_keys(message_text)  # Removed \n prefix, let's keep it clean
+        textarea.send_keys("\n" + message_text)
 
-        # 3. Wait for Button to Enable (The "Pro" way)
-        # Instead of sleep(0.5), we wait for the button to not be disabled
+        # 3. Wait for Button to Enable
         run_button = driver.find_element(By.CSS_SELECTOR, "button[aria-label='Run']")
 
         # Explicitly wait until the button is clickable (meaning the text was registered)

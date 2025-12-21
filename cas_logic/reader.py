@@ -12,7 +12,6 @@ OUTPUT_FILE = "latest_message.md"
 
 
 def connect_chrome():
-    """Connects to the running Chrome instance."""
     options = Options()
     options.add_experimental_option("debuggerAddress", DEBUG_PORT)
     try:
@@ -23,10 +22,7 @@ def connect_chrome():
 
 
 def wait_for_clipboard_update(previous_content, timeout=5):
-    """
-    Waits until the clipboard content changes from what it was before.
-    Returns the new content, or None if it timed out.
-    """
+    """Waits for clipboard to change."""
     start_time = time.time()
     while time.time() - start_time < timeout:
         current_content = pyperclip.paste()
@@ -37,35 +33,31 @@ def wait_for_clipboard_update(previous_content, timeout=5):
 
 
 def trigger_google_copy(driver, thumbs_up_button):
-    """
-    Navigates from Thumbs Up -> Parent Bubble -> Three Dots -> Copy.
-    """
+    """Navigates from Thumbs Up -> Parent Bubble -> Three Dots -> Copy."""
     try:
-        # 1. Snapshot current clipboard (so we know when it changes)
         old_clipboard = pyperclip.paste()
 
-        # 2. Find the container bubble (Go up from Thumbs Up)
+        # 1. Find the container bubble
         chat_bubble = thumbs_up_button.find_element(By.XPATH,
                                                     "./ancestor::div[contains(@class, 'chat-turn-container')]")
 
-        # 3. Find and Click the 'Three Dots' (Force Click)
+        # 2. Find and Click 'Three Dots'
         options_btn = chat_bubble.find_element(By.CSS_SELECTOR, "button[aria-label='Open options']")
         driver.execute_script("arguments[0].click();", options_btn)
 
-        # 4. Wait for Menu and Click 'Copy as markdown'
+        # 3. Wait for Menu and Click 'Copy as markdown'
         wait = WebDriverWait(driver, 3)
         copy_menu_item = wait.until(EC.element_to_be_clickable(
             (By.XPATH, "//span[contains(text(), 'Copy as markdown')]/ancestor::button")
         ))
         copy_menu_item.click()
 
-        # 5. Wait for the OS Clipboard to actually receive the new text
+        # 4. Wait for Clipboard
         new_text = wait_for_clipboard_update(old_clipboard)
-
         return new_text
 
     except Exception as e:
-        print(f"  [!] Interaction Error: {e}")
+        # If interaction fails (e.g. menu didn't open), return None
         return None
 
 
@@ -73,17 +65,17 @@ def main():
     driver = connect_chrome()
     if not driver: return
 
-    print("--- READER V7: THUMBS-UP TRIGGER ACTIVE ---")
+    print("--- READER V9: VERIFIED TRIGGER ACTIVE ---")
 
-    # Track the specific ID of the Thumbs Up button to avoid duplicates
-    last_processed_id = None
+    # We store the ACTUAL CONTENT of the last saved file.
+    # This is the ultimate source of truth.
+    last_saved_content = ""
 
     while True:
         try:
             # 1. Find all 'Good response' buttons
             thumbs_buttons = driver.find_elements(By.CSS_SELECTOR, "button[aria-label='Good response']")
 
-            # If none exist, just wait
             if not thumbs_buttons:
                 time.sleep(1)
                 continue
@@ -91,26 +83,41 @@ def main():
             # 2. Target the latest one
             latest_button = thumbs_buttons[-1]
 
-            # 3. Check if we have already handled this specific button
-            if latest_button.id != last_processed_id:
-                print("\n[!] New message detected via Thumbs Up.")
+            # 3. Optimization: Check for a JS flag
+            # We tag the button in the browser so we don't check it 100 times a second
+            is_processed = driver.execute_script("return arguments[0].getAttribute('data-cas-processed')",
+                                                 latest_button)
 
-                # Execute the extraction
-                captured_text = trigger_google_copy(driver, latest_button)
+            if is_processed == "true":
+                time.sleep(1)
+                continue
 
-                if captured_text:
-                    # Save to file
+            # 4. If not marked as processed, we suspect it might be new.
+            print("\n[?] Unprocessed message detected. Verifying...")
+
+            # Perform the copy
+            captured_text = trigger_google_copy(driver, latest_button)
+
+            if captured_text:
+                # --- THE DOUBLE CHECK ---
+                # Compare what we just copied to what we last saved.
+                # We strip whitespace to avoid issues with newlines/spaces.
+                if captured_text.strip() == last_saved_content.strip():
+                    print("  [i] False alarm. Content matches last save. Marking as done.")
+                else:
+                    # It IS new!
                     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
                         f.write(captured_text)
+                    print(f"  [System] SAVED NEW MESSAGE ({len(captured_text)} chars).")
+                    last_saved_content = captured_text
 
-                    print(f"  [System] Saved {len(captured_text)} chars to {OUTPUT_FILE}")
-
-                    # Mark this button ID as processed
-                    last_processed_id = latest_button.id
-                    print("Waiting for next prompt...")
+                # 5. Mark this button as processed in the DOM
+                # This prevents the loop from trying again until the button is replaced (new message)
+                driver.execute_script("arguments[0].setAttribute('data-cas-processed', 'true')", latest_button)
+                print("Waiting for next prompt...")
 
             else:
-                # Idle wait
+                print("  [!] Failed to copy. Will retry...")
                 time.sleep(1)
 
         except Exception:
