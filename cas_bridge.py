@@ -1,6 +1,6 @@
-import time
-import os
-import pyperclip
+import time, os, pyperclip
+import cas_config as cfg
+from cas_logic import vision, upload_file
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -8,101 +8,104 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# Import logic modules
-from cas_logic import vision
-from cas_logic import upload_file  # <--- You renamed this, which is good.
 
-DEBUG_PORT = "127.0.0.1:9222"
+def connect_chrome():
+    opt = Options()
+    opt.add_experimental_option("debuggerAddress", cfg.CHROME_DEBUG_PORT)
+    return webdriver.Chrome(options=opt)
+
+
+# --- HELPER: UNIFIED INJECTION LOGIC ---
+def inject_to_chat(driver, text=None, use_paste=False):
+    """Handles Clicking, Pasting (optional), Typing, and Submitting."""
+    try:
+        # 1. Click Box
+        box = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, "textarea[aria-label='Enter a prompt']")))
+        box.click()
+
+        # 2. Paste (Image/File)
+        if use_paste:
+            box.send_keys(Keys.CONTROL, 'v')
+            time.sleep(2)  # Allow attachment processing
+
+        # 3. Type Text
+        if text:
+            box.send_keys(Keys.END, "\n" + text)
+            time.sleep(1)
+
+        # 4. Submit
+        box.send_keys(Keys.CONTROL, Keys.ENTER)
+        return True
+    except Exception as e:
+        print(f"[BRIDGE ERROR] {e}")
+        return False
+
+
+# --- HELPER: READER LOGIC ---
+def check_for_new_message(driver):
+    try:
+        buttons = driver.find_elements(By.CSS_SELECTOR, "button[aria-label='Good response']")
+        if not buttons: return
+
+        latest = buttons[-1]
+        if driver.execute_script("return arguments[0].getAttribute('data-cas-processed')", latest) == "true":
+            return
+
+        # Copy Sequence
+        pyperclip.copy("")
+        driver.execute_script(
+            "arguments[0].closest('.chat-turn-container').querySelector('button[aria-label=\"Open options\"]').click()",
+            latest)
+        WebDriverWait(driver, 2).until(
+            EC.element_to_be_clickable((By.XPATH, "//span[contains(text(), 'Copy as markdown')]"))).click()
+
+        for _ in range(20):
+            content = pyperclip.paste()
+            if content.strip():
+                with open(cfg.LATEST_MSG_FILE, "w", encoding="utf-8") as f: f.write(content)
+                driver.execute_script("arguments[0].setAttribute('data-cas-processed', 'true')", latest)
+                print(f"[BRIDGE] New message captured ({len(content)} chars).")
+                return
+            time.sleep(0.1)
+    except:
+        pass
 
 
 def main():
-    print("--- CAS BRIDGE (VISION + UPLOAD + TEXT) ---")
-    opt = Options()
-    opt.add_experimental_option("debuggerAddress", DEBUG_PORT)
-    driver = webdriver.Chrome(options=opt)
-
-    if not os.path.exists("command_queue.txt"): open("command_queue.txt", 'w').close()
+    print("--- CAS BRIDGE (FINAL) ---")
+    driver = connect_chrome()
+    if not os.path.exists(cfg.COMMAND_FILE): open(cfg.COMMAND_FILE, 'w').close()
 
     while True:
-        try:
-            # --- 1. READ (EARS) ---
-            # (Standard Reader Logic)
-            buttons = driver.find_elements(By.CSS_SELECTOR, "button[aria-label='Good response']")
-            if buttons:
-                latest = buttons[-1]
-                if driver.execute_script("return arguments[0].getAttribute('data-cas-processed')", latest) != "true":
-                    pyperclip.copy("")
-                    driver.execute_script(
-                        "arguments[0].closest('.chat-turn-container').querySelector('button[aria-label=\"Open options\"]').click()",
-                        latest)
-                    WebDriverWait(driver, 2).until(
-                        EC.element_to_be_clickable((By.XPATH, "//span[contains(text(), 'Copy as markdown')]"))).click()
-                    for _ in range(20):
-                        content = pyperclip.paste()
-                        if content.strip():
-                            with open("latest_message.md", "w", encoding="utf-8") as f: f.write(content)
-                            driver.execute_script("arguments[0].setAttribute('data-cas-processed', 'true')", latest)
-                            print(f"[BRIDGE] Saved {len(content)} chars.")
-                            break
-                        time.sleep(0.1)
+        # 1. READ
+        check_for_new_message(driver)
 
-            # --- 2. WRITE ---
-            if os.path.getsize("command_queue.txt") > 0:
-                with open("command_queue.txt", "r+", encoding="utf-8") as f:
-                    cmd = f.read().strip()
-                    if cmd:
-                        print(f"[BRIDGE] Processing command...")
+        # 2. WRITE
+        if os.path.getsize(cfg.COMMAND_FILE) > 0:
+            with open(cfg.COMMAND_FILE, "r+", encoding="utf-8") as f:
+                raw_cmd = f.read().strip()
+                if raw_cmd:
+                    print(f"[BRIDGE] CMD: {raw_cmd[:30]}...")
 
-                        box = WebDriverWait(driver, 5).until(
-                            EC.element_to_be_clickable((By.CSS_SELECTOR, "textarea[aria-label='Enter a prompt']")))
-                        box.click()
+                    # Route Command
+                    if raw_cmd.startswith("SCREENSHOT|||"):
+                        text = raw_cmd.split("SCREENSHOT|||")[1]
+                        if vision.take_screenshot_to_clipboard():
+                            inject_to_chat(driver, text, use_paste=True)
 
-                        # A. SCREENSHOT
-                        if cmd.startswith("SCREENSHOT|||"):
-                            text_part = cmd.split("SCREENSHOT|||")[1]
-                            print("[BRIDGE] Taking Screenshot...")
-                            if vision.take_screenshot_to_clipboard():
-                                box.send_keys(Keys.CONTROL, 'v')
-                                time.sleep(2)
-                                box.send_keys(Keys.END, "\n" + text_part)
-                                time.sleep(1)
-                                box.send_keys(Keys.CONTROL, Keys.ENTER)
+                    elif raw_cmd.startswith("UPLOAD|||"):
+                        parts = raw_cmd.split("|||")
+                        if upload_file.copy_file_to_clipboard(parts[1]):
+                            inject_to_chat(driver, parts[2], use_paste=True)
 
-                        # B. UPLOAD (NEW PROTOCOL)
-                        elif cmd.startswith("UPLOAD|||"):
-                            # Split into: [UPLOAD, path, text]
-                            parts = cmd.split("|||")
-                            if len(parts) >= 3:
-                                path = parts[1]
-                                text_part = parts[2]
+                    else:
+                        # Standard Text
+                        inject_to_chat(driver, raw_cmd, use_paste=False)
 
-                                print(f"[BRIDGE] Uploading file: {path}")
-                                if upload_file.copy_file_to_clipboard(path):
-                                    # 1. Paste File
-                                    box.send_keys(Keys.CONTROL, 'v')
-                                    time.sleep(2)
+                f.truncate(0)
 
-                                    # 2. Type Text
-                                    box.send_keys(Keys.END, "\n" + text_part)
-                                    time.sleep(1)
-
-                                    # 3. Submit
-                                    box.send_keys(Keys.CONTROL, Keys.ENTER)
-                                else:
-                                    box.send_keys(Keys.END, f"\n[SYSTEM ERROR] Could not upload file: {path}")
-                                    box.send_keys(Keys.CONTROL, Keys.ENTER)
-
-                        # C. STANDARD TEXT
-                        else:
-                            box.send_keys(Keys.END, "\n" + cmd)
-                            time.sleep(1)
-                            box.send_keys(Keys.CONTROL, Keys.ENTER)
-
-                    f.truncate(0)
-
-        except Exception:
-            pass
-        time.sleep(1)
+        time.sleep(cfg.BRIDGE_LOOP_DELAY)
 
 
 if __name__ == "__main__":

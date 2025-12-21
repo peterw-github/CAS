@@ -1,23 +1,14 @@
-import mss
-import mss.tools
+import mss, io, win32clipboard
 from PIL import Image
-import io
-import win32clipboard
-
 
 def take_screenshot_to_clipboard():
-    """Captures the primary monitor and places it in the Clipboard."""
     try:
         with mss.mss() as sct:
-            # Monitor 1 is usually the primary. 0 is 'All combined'.
-            # Let's stick to monitor 1 for cleaner vision, or 0 if you have a massive setup.
-            monitor_info = sct.monitors[1]
-
-            print(f"[VISION] Capturing monitor: {monitor_info}")
-            sct_img = sct.grab(monitor_info)
+            monitor = sct.monitors[0] # 0 = All Monitors
+            print(f"[VISION] Capturing: {monitor}")
+            sct_img = sct.grab(monitor)
             img = Image.frombytes("RGB", sct_img.size, sct_img.bgra, "raw", "BGRX")
 
-            # Convert to DIB for Windows Clipboard
             output = io.BytesIO()
             img.convert("RGB").save(output, "BMP")
             data = output.getvalue()[14:]
