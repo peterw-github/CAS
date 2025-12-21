@@ -1,15 +1,12 @@
 import time
 import datetime
 import re
-import sys
-import os
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
 # --- MODULAR IMPORTS ---
 # Ensure your folder is named 'cas_logic' and has an empty __init__.py file inside it (optional in newer Python but good practice)
-from cas_logic import injector
-from cas_logic import reader
+from Archived import injector, reader
 
 # --- CONFIG ---
 DEBUG_PORT = "127.0.0.1:9222"
@@ -65,7 +62,7 @@ Current Interval: {int(current_interval / 60)}m.
         response_text = reader.wait_for_next_message(driver)
 
         # Save log
-        with open("latest_message.md", "w", encoding="utf-8") as f:
+        with open("../latest_message.md", "w", encoding="utf-8") as f:
             f.write(response_text)
 
         # 4. THINK
