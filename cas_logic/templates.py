@@ -6,12 +6,12 @@ def get_timestamp():
 def get_menu_block():
     return """```markdown
 **Available Commands:**
-* `!CAS freq X`
-* `!CAS exec [cmd]`
-* `!CAS upload [path]`
-* `!CAS screenshot`
-* `!CAS prompt_now`
-* `!CAS stop`
+* !CAS prompt_frequency [X] 
+* !CAS exec [cmd]
+* !CAS upload [path]
+* !CAS screenshot
+* !CAS prompt_now
+* !CAS stop
 ```"""
 
 def format_heartbeat(interval_minutes):
