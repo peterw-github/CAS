@@ -4,7 +4,6 @@ import re
 import os
 import sys
 
-print(3+3)
 # Import our Hand (Injector)
 # Ensure this path matches your project structure
 from cas_logic.injector import send_prompt
