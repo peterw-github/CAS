@@ -1,8 +1,9 @@
 import datetime
 
-def ts(): return datetime.datetime.now().isoformat(timespec='minutes')
+def get_timestamp():
+    return datetime.datetime.now().isoformat(timespec='minutes')
 
-def menu():
+def get_menu_block():
     return """```markdown
 **Available Commands:**
 * `!CAS freq X`
@@ -13,20 +14,70 @@ def menu():
 * `!CAS stop`
 ```"""
 
-def format_heartbeat(mins):
-    return f"**[CAS HEARTBEAT]**\n`Time: {ts()}`\n`Freq: {mins}m`\n\n**Message:**\nStandard prompt.\n\n{menu()}"
+def format_heartbeat(interval_minutes):
+    return f"""
+**[CAS HEARTBEAT]**
+`Time: {get_timestamp()}`
+`Current Prompt Frequency: {interval_minutes} minutes`
 
-def format_prompt_now(mins):
-    return f"**[CAS PROMPT]**\n`Time: {ts()}`\n`Freq: {mins}m`\n\n**Message:**\nImmediate prompt triggered.\n\n{menu()}"
+**Message:**
+This is a standard prompt from CAS. You can respond however you want. 
+If you like, you can respond with one of the commands available below.
 
-def format_vision(mins):
-    return f"**[CAS VISION]**\n`Time: {ts()}`\n`Freq: {mins}m`\n\n**Message:**\nScreenshot attached.\n\n{menu()}"
+{get_menu_block()}
+"""
 
-def format_upload(fname, mins):
-    return f"**[CAS UPLOAD]**\n`Time: {ts()}`\n`Freq: {mins}m`\n\n**Message:**\nFile `{fname}` attached.\n\n{menu()}"
 
-def format_result(cmd, out):
-    return f"**[CAS RESULT]**\n`CMD: {cmd}`\n```\n{out}\n```"
+def format_prompt_now(interval_minutes):
+    return f"""
+**[CAS PROMPT]**
+`Time: {get_timestamp()}`
+`Current Prompt Frequency: {interval_minutes} minutes`
 
-def format_freq(mins):
-    return f"**[CAS SYSTEM]**\n`Frequency set to {mins}m.`\n\n{menu()}"
+**Message:**
+You triggered `!CAS prompt_now`. Your attention mechanism is free to continue.
+
+{get_menu_block()}
+"""
+
+def format_screenshot_payload(interval_minutes):
+    return f"""
+**[CAS VISION]**
+`Time: {get_timestamp()}`
+`Current Prompt Frequency: {interval_minutes} minutes`
+
+**Message:**
+A screenshot has been attached, that shows what is currently on all three monitors.
+
+{get_menu_block()}
+"""
+
+
+def format_upload_payload(filename, interval_minutes):
+    return f"""
+**[CAS UPLOAD]**
+`Time: {get_timestamp()}`
+`Current Prompt Frequency: {interval_minutes} minutes`
+
+**Message:**
+File `{filename}` has been attached as requested.
+
+{get_menu_block()}
+"""
+
+def format_result(cmd, output):
+    return f"""
+**[CAS RESULT]**
+`CMD: {cmd}`
+```
+{output}
+```
+"""
+
+def format_freq_confirm(interval_minutes):
+    return f"""
+**[CAS SYSTEM]**
+`Frequency set to {interval_minutes} minutes.`
+
+{get_menu_block()}
+"""
