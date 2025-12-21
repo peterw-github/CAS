@@ -1,13 +1,7 @@
 import os
 import time
+import injector
 
-# We import the function directly from your existing injector.py
-# Make sure injector.py is in the same folder!
-try:
-    from injector import send_prompt
-except ImportError:
-    print("[!] Critical: Could not find 'injector.py'. Make sure it is in the same folder.")
-    exit()
 
 INPUT_FILE = "latest_message.md"
 
@@ -33,12 +27,7 @@ def relay_last_message():
 
     print(f"[*] Content loaded ({len(message_content)} chars).")
 
-    # Optional: Add a meta-prompt so I know why you are sending this back
-    # You can comment this out if you just want the raw text
-    final_payload = f"Please review/summarize the following text:\n\n{message_content}"
-
-    # OR, if you want just the raw text:
-    # final_payload = message_content
+    final_payload = message_content
 
     # 3. Trigger the Injector
     print("[*] Injecting payload into Chrome...")
