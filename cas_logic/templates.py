@@ -4,15 +4,16 @@ def get_timestamp():
     return datetime.datetime.now().isoformat(timespec='minutes')
 
 def get_menu_block():
-    return """```markdown
+    return """
 **Available Commands:**
-* !CAS prompt_frequency [X] 
-* !CAS exec [cmd]
-* !CAS upload [path]
-* !CAS screenshot
-* !CAS prompt_now
-* !CAS stop
-```"""
+* `!CAS prompt_frequency [X]`
+* `!CAS exec [cmd]`
+* `!CAS upload [path]`
+* `!CAS screenshot`
+* `!CAS prompt_now`
+* `!CAS stop`
+
+"""
 
 def format_heartbeat(interval_minutes):
     return f"""

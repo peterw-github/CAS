@@ -9,6 +9,7 @@ def get_mtime():
 
 def send(text):
     with open(cfg.COMMAND_FILE, "w", encoding="utf-8") as f: f.write(text)
+    time.sleep(0.2)
 
 
 def smart_wait(seconds, last_mtime):
@@ -32,39 +33,53 @@ def process_message(curr_int):
     stop = False
     found_cmd = False
 
-    # Check for Magic Commands (!CAS ...)
-    for m in re.finditer(r'(?m)^!CAS\s+(\w+)\s*(.*)', text):
-        found_cmd = True
-        key, args = m.group(1).lower(), m.group(2).strip()
+    # Regex: Matches `!CAS keyword args`
+    matches = re.finditer(r'(?m)^`!CAS\s+(\w+)\s*([^`]*)`', text)
 
-        if key in ["freq", "frequency", "timer"]:
+    for m in matches:
+        found_cmd = True
+        key = m.group(1).lower()
+        args = m.group(2).strip()
+
+        # 1. FREQUENCY (Added 'prompt_frequency' to the list)
+        if key in ["freq", "frequency", "timer", "prompt_frequency"]:
             try:
-                mins = int(args)
+                # Cleanup args just in case
+                clean_args = args.replace("`", "").strip()
+                # Remove brackets [ ] if user typed them literally
+                clean_args = clean_args.replace("[", "").replace("]", "")
+
+                mins = int(clean_args)
                 new_int = mins * 60
                 print(f"  >>> [CMD] Frequency: {mins}m")
-                send(templates.format_freq(mins))
-            except:
-                pass
+                send(templates.format_freq_confirm(mins))
+            except ValueError:
+                print(f"  >>> [ERROR] Invalid Freq: {args}")
 
+        # 2. EXEC
         elif key == "exec":
             out = actions.run_system_command(args)
             send(templates.format_result(args, out))
             print("  >>> [RES SENT]")
 
+        # 3. PROMPT NOW
         elif key == "prompt_now":
             print("  >>> [CMD] Prompt Now")
             send(templates.format_prompt_now(int(curr_int / 60)))
 
+        # 4. SCREENSHOT
         elif key == "screenshot":
             print("  >>> [CMD] Screenshot")
             send(f"SCREENSHOT|||{templates.format_vision(int(curr_int / 60))}")
 
+        # 5. UPLOAD
         elif key == "upload":
             if os.path.exists(args):
                 print(f"  >>> [CMD] Upload: {args}")
                 fname = os.path.basename(args)
                 send(f"UPLOAD|||{args}|||{templates.format_upload(fname, int(curr_int / 60))}")
 
+        # 6. STOP
         elif key == "stop":
             stop = True
 
@@ -73,7 +88,7 @@ def process_message(curr_int):
 
 
 def main():
-    print("[CAS BRAIN] Online.")
+    print("[CAS BRAIN] Online. Fixed Keywords.")
     curr_int = cfg.DEFAULT_INTERVAL
     last_mtime = get_mtime()
     next_hb = time.time()
