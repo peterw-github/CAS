@@ -41,17 +41,15 @@ def process_message(curr_int):
         key = m.group(1).lower()
         args = m.group(2).strip()
 
-        # 1. FREQUENCY (Added 'prompt_frequency' to the list)
+        # 1. FREQUENCY
         if key in ["freq", "frequency", "timer", "prompt_frequency"]:
             try:
-                # Cleanup args just in case
-                clean_args = args.replace("`", "").strip()
-                # Remove brackets [ ] if user typed them literally
-                clean_args = clean_args.replace("[", "").replace("]", "")
-
+                clean_args = args.replace("`", "").replace("[", "").replace("]", "").strip()
                 mins = int(clean_args)
                 new_int = mins * 60
                 print(f"  >>> [CMD] Frequency: {mins}m")
+
+                # UPDATED CALL: format_freq_confirm
                 send(templates.format_freq_confirm(mins))
             except ValueError:
                 print(f"  >>> [ERROR] Invalid Freq: {args}")
@@ -70,14 +68,18 @@ def process_message(curr_int):
         # 4. SCREENSHOT
         elif key == "screenshot":
             print("  >>> [CMD] Screenshot")
-            send(f"SCREENSHOT|||{templates.format_vision(int(curr_int / 60))}")
+            # UPDATED CALL: format_screenshot_payload
+            payload = templates.format_screenshot_payload(int(curr_int / 60))
+            send(f"SCREENSHOT|||{payload}")
 
         # 5. UPLOAD
         elif key == "upload":
             if os.path.exists(args):
                 print(f"  >>> [CMD] Upload: {args}")
                 fname = os.path.basename(args)
-                send(f"UPLOAD|||{args}|||{templates.format_upload(fname, int(curr_int / 60))}")
+                # UPDATED CALL: format_upload_payload
+                payload = templates.format_upload_payload(fname, int(curr_int / 60))
+                send(f"UPLOAD|||{args}|||{payload}")
 
         # 6. STOP
         elif key == "stop":
@@ -88,7 +90,7 @@ def process_message(curr_int):
 
 
 def main():
-    print("[CAS BRAIN] Online. Fixed Keywords.")
+    print("[CAS BRAIN] Online. Template Names Synced.")
     curr_int = cfg.DEFAULT_INTERVAL
     last_mtime = get_mtime()
     next_hb = time.time()

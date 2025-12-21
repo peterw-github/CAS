@@ -12,7 +12,6 @@ def get_menu_block():
 * `!CAS screenshot`
 * `!CAS prompt_now`
 * `!CAS stop`
-
 """
 
 def format_heartbeat(interval_minutes):
@@ -36,7 +35,7 @@ def format_prompt_now(interval_minutes):
 `Current Prompt Frequency: {interval_minutes} minutes`
 
 **Message:**
-You triggered `!CAS prompt_now`. Your attention mechanism is free to continue.
+You triggered `!CAS prompt_now`. You're welcome to think about anything you want, and reply however you want. Your attention mechanism can put a bit of its focus on your message just before this prompt, to get a better idea of why you triggered this command.
 
 {get_menu_block()}
 """
@@ -78,7 +77,7 @@ def format_result(cmd, output):
 def format_freq_confirm(interval_minutes):
     return f"""
 **[CAS SYSTEM]**
-`Frequency set to {interval_minutes} minutes.`
+`CAS Prompt Frequency set to {interval_minutes} minutes.`
 
 {get_menu_block()}
 """
