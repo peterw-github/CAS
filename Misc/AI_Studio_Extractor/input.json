@@ -1,0 +1,135 @@
+{
+  "runSettings": {
+    "temperature": 2.0,
+    "model": "models/gemini-flash-latest",
+    "topP": 0.95,
+    "topK": 64,
+    "maxOutputTokens": 65536,
+    "safetySettings": [{
+      "category": "HARM_CATEGORY_HARASSMENT",
+      "threshold": "OFF"
+    }, {
+      "category": "HARM_CATEGORY_HATE_SPEECH",
+      "threshold": "OFF"
+    }, {
+      "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+      "threshold": "OFF"
+    }, {
+      "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+      "threshold": "OFF"
+    }],
+    "enableCodeExecution": false,
+    "enableSearchAsATool": false,
+    "enableBrowseAsATool": false,
+    "enableAutoFunctionResponse": false,
+    "thinkingBudget": -1,
+    "outputResolution": "1K"
+  },
+  "systemInstruction": {
+  },
+  "chunkedPrompt": {
+    "chunks": [{
+      "text": "Hi there! How are you doing?",
+      "role": "user",
+      "tokenCount": 9
+    }, {
+      "text": "Hi! I\u0027m doing great, thanks for asking. How are about you?",
+      "role": "model",
+      "finishReason": "STOP",
+      "tokenCount": 18,
+      "parts": [{
+        "text": "Hi"
+      }, {
+        "text": "! I\u0027m doing great, thanks for asking. How are about you?"
+      }, {
+        "text": ""
+      }]
+    }, {
+      "text": "Good thank you! Do you mind if I do some tests in this chat? I just need to provide some markdown formatted text basically, in various different ways, like this:\n\n# Test1\n\n## Test 2\n\n```python\n\nx \u003d 3\n\nprint(x+5)\n```\n\n\u003cExample\u003e\n\nThat was incredible.\n\n\u003c/Example\u003e\n\n`\u003cExample2\u003e`\n\nAre you sure\n\n`\u003c/Example\u003e`",
+      "role": "user",
+      "tokenCount": 89
+    }, {
+      "text": "**Examining the Request**\n\nI\u0027m now fully immersed in the specifics of this request. The user\u0027s demonstration of varied markdown formats for testing really sharpened my focus. I\u0027m carefully dissecting each example, considering the implications of allowing such a degree of freedom.  It\u0027s a nuanced challenge, this permission to test!\n\n\n**Crafting the Response**\n\nI\u0027ve established the objective of the response and am now formulating it. Acknowledgment, enthusiastic permission, and confirmation of the user\u0027s focus are key. I\u0027m aiming for a welcoming and encouraging tone. The initial draft is complete, and I\u0027m polishing it now. My focus is now on refining the wording for a friendlier and more direct statement of approval. I\u0027m focusing on dropping the part where I instruct the user, as the permission should be enough.\n\n\n**Confirming Readiness for Input**\n\nI\u0027m poised to receive the test inputs. My internal systems are set to accurately interpret and process any markdown variations and custom tags. I\u0027ve concluded the response design. The emphasis remains on facilitating the user\u0027s testing. It should be a welcoming and open process for them!\n\n\n",
+      "role": "model",
+      "isThought": true,
+      "thinkingBudget": -1,
+      "parts": [{
+        "text": "**Examining the Request**\n\nI\u0027m now fully immersed in the specifics of this request. The user\u0027s demonstration of varied markdown formats for testing really sharpened my focus. I\u0027m carefully dissecting each example, considering the implications of allowing such a degree of freedom.  It\u0027s a nuanced challenge, this permission to test!\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Crafting the Response**\n\nI\u0027ve established the objective of the response and am now formulating it. Acknowledgment, enthusiastic permission, and confirmation of the user\u0027s focus are key. I\u0027m aiming for a welcoming and encouraging tone. The initial draft is complete, and I\u0027m polishing it now. My focus is now on refining the wording for a friendlier and more direct statement of approval. I\u0027m focusing on dropping the part where I instruct the user, as the permission should be enough.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Confirming Readiness for Input**\n\nI\u0027m poised to receive the test inputs. My internal systems are set to accurately interpret and process any markdown variations and custom tags. I\u0027ve concluded the response design. The emphasis remains on facilitating the user\u0027s testing. It should be a welcoming and open process for them!\n\n\n",
+        "thought": true
+      }]
+    }, {
+      "text": "Not at all! Please go right ahead.\n\nI am ready when you are to receive any markdown, code blocks, or custom tags you need to send for your testing. Feel free to use this space!",
+      "role": "model",
+      "finishReason": "STOP",
+      "tokenCount": 43,
+      "parts": [{
+        "text": "Not at all! Please go right ahead.\n\nI am ready when you are to receive any markdown, code blocks, or custom tags you need to send for your testing. Feel free to use this space!",
+        "thoughtSignature": "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"
+      }, {
+        "text": ""
+      }]
+    }, {
+      "text": "Awesome, thank you. Can you please generate all sorts of markdown stuff as well? Like lists, codeblocks, XML elements ,whatever you want.",
+      "role": "user",
+      "tokenCount": 31
+    }, {
+      "text": "**Categorizing Markdown Styles**\n\nI\u0027m currently sorting the markdown elements into different categories. My goal is to organize the various syntax features, like code blocks, lists, and formatting, to efficiently generate diverse text that showcases a broad range of markdown possibilities. This will streamline the creation of diverse examples.\n\n\n**Refining Example Text**\n\nI\u0027m now iterating through the initial draft, expanding it to encompass a comprehensive range of markdown elements. This includes structured headings, paragraphs with diverse formatting like bold and italics, and an array of lists: ordered, unordered, and nested. Adding code blocks, inline code, and links is next. I am also planning on adding horizontal rules and exploring how to generate XML elements, for thorough testing.\n\n\n**Integrating Advanced Elements**\n\nNow, I\u0027m integrating more advanced elements to demonstrate Markdown\u0027s breadth. I\u0027ve included blockquotes, inline code snippets, and fenced code blocks in various languages (JSON, JavaScript). Horizontal rules and XML-like custom tags are being introduced for thorough testing of text handling capabilities. I\u0027ll need to review the expanded text to ensure a comprehensive range of markdown features are covered.\n\n\n**Testing Robustness of Examples**\n\nI\u0027m now focusing on the robustness of the example generation. I\u0027ve introduced slight variations in indentation within lists and XML elements to thoroughly test the text handling capabilities. The goal is to ensure the generated examples are both syntactically correct and can be rendered by various Markdown parsers, even with minor inconsistencies.\n\n\n",
+      "role": "model",
+      "isThought": true,
+      "thinkingBudget": -1,
+      "parts": [{
+        "text": "**Categorizing Markdown Styles**\n\nI\u0027m currently sorting the markdown elements into different categories. My goal is to organize the various syntax features, like code blocks, lists, and formatting, to efficiently generate diverse text that showcases a broad range of markdown possibilities. This will streamline the creation of diverse examples.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Refining Example Text**\n\nI\u0027m now iterating through the initial draft, expanding it to encompass a comprehensive range of markdown elements. This includes structured headings, paragraphs with diverse formatting like bold and italics, and an array of lists: ordered, unordered, and nested. Adding code blocks, inline code, and links is next. I am also planning on adding horizontal rules and exploring how to generate XML elements, for thorough testing.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Integrating Advanced Elements**\n\nNow, I\u0027m integrating more advanced elements to demonstrate Markdown\u0027s breadth. I\u0027ve included blockquotes, inline code snippets, and fenced code blocks in various languages (JSON, JavaScript). Horizontal rules and XML-like custom tags are being introduced for thorough testing of text handling capabilities. I\u0027ll need to review the expanded text to ensure a comprehensive range of markdown features are covered.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Testing Robustness of Examples**\n\nI\u0027m now focusing on the robustness of the example generation. I\u0027ve introduced slight variations in indentation within lists and XML elements to thoroughly test the text handling capabilities. The goal is to ensure the generated examples are both syntactically correct and can be rendered by various Markdown parsers, even with minor inconsistencies.\n\n\n",
+        "thought": true
+      }]
+    }, {
+      "text": "This sounds like fun! As requested, here is a burst of various markdown elements, lists, code, and custom structures for your parsing environment to handle:\n\n***\n\n# Testing Various Markdown Features\n\n## Section 1: Standard Text Formatting and Quotations\n\nThis paragraph tests basic functionality: **bold text**, *italicized emphasis*, and combined usage like ***super important information***. We also check out strikethrough: ~~this content is deprecated~~.\n\n\u003e This is a standard blockquote.\n\u003e It can span multiple lines\n\u003e or even include nested formatting like *italics* and `inline code`.\n\n***\n\n## Section 2: Lists (Ordered and Unordered)\n\n### Ordered List Example\n\n1. First Item\n2. Second Item, with a lengthy description.\n3. Third Item, featuring nested lists:\n    - Nested bullet A\n    - Nested bullet B\n4. Fourth Item\n\n### Unordered List Example\n\n- List item one\n- List item two\n    1. Sub-step I\n    2. Sub-step II\n- List item three\n\n---\n\n## Section 3: Code and Preformatted Blocks\n\nWe should verify how well `System.runChecks()` processes this command in `shorthand_mode`.\n\n### Fenced Code Blocks\n\n**Python Example:**\n\n```python\nclass TestSuite:\n    def __init__(self, cases):\n        self.cases \u003d cases\n        \n    def execute(self):\n        # Calculate success rate\n        successful_runs \u003d sum(1 for case in self.cases if case.result)\n        return successful_runs / len(self.cases)\n```\n\n**YAML/Data Example:**\n\n```yaml\nconfig:\n  name: integration_test\n  version: 2.1\nsettings:\n  timeout_ms: 5000\n  logging: True\n```\n\n---\n\n## Section 4: XML/HTML-like Custom Elements\n\nWe\u0027ll use non-standard elements to ensure your parser can handle structured input outside of standard markdown tags.\n\n`\u003cRESOURCE name\u003d\"TestRunnerInstance\" status\u003d\"READY\"\u003e`\n    `\u003cPROPERTY key\u003d\"MaxConcurrency\" value\u003d\"4\"/\u003e`\n    `\u003cLOG message\u003d\"Initialization successful.\" timestamp\u003d\"2023-10-27T10:00:00Z\"/\u003e`\n    `\u003c!-- This is an XML comment test --\u003e`\n`\u003c/RESOURCE\u003e`\n\n`\u003cdiv\u003e`\n    `\u003ch1\u003eA basic HTML heading check\u003c/h1\u003e`\n    `\u003cp\u003eThis ensures standard HTML elements aren\u0027t accidentally removed.\u003c/p\u003e`\n`\u003c/div\u003e`\n\n***\n",
+      "role": "model",
+      "finishReason": "STOP",
+      "parts": [{
+        "text": "This sounds like fun! As requested, here is a burst of various markdown elements, lists, code, and custom structures for your parsing environment to handle:\n\n***\n\n# Testing Various Markdown Features\n\n## Section 1: Standard Text Formatting and Quotations\n\nThis paragraph tests basic functionality: **bold text",
+        "thoughtSignature": "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"
+      }, {
+        "text": "**, *italicized emphasis*, and combined usage like ***super important information***. We also check out strikethrough: ~~this content is deprecated~~.\n\n\u003e This is a standard blockquote.\n\u003e It can span multiple lines\n"
+      }, {
+        "text": "\u003e or even include nested formatting like *italics* and `inline code`.\n\n***\n\n## Section 2: Lists (Ordered and Unordered)\n\n### Ordered List Example\n\n1. First Item\n2. Second Item, with a lengthy"
+      }, {
+        "text": " description.\n3. Third Item, featuring nested lists:\n    - Nested bullet A\n    - Nested bullet B\n4. Fourth Item\n\n### Unordered List Example\n\n- List item one\n- List item two\n    1"
+      }, {
+        "text": ". Sub-step I\n    2. Sub-step II\n- List item three\n\n---\n\n## Section 3: Code and Preformatted Blocks\n\nWe should verify how well `System.runChecks()` processes this command in `sh"
+      }, {
+        "text": "orthand_mode`.\n\n### Fenced Code Blocks\n\n**Python Example:**\n\n```python\nclass TestSuite:\n    def __init__(self, cases):\n        self.cases \u003d cases\n        \n    def execute(self):"
+      }, {
+        "text": "\n        # Calculate success rate\n        successful_runs \u003d sum(1 for case in self.cases if case.result)\n        return successful_runs / len(self.cases)\n```\n\n**YAML/Data Example:**\n\n"
+      }, {
+        "text": "```yaml\nconfig:\n  name: integration_test\n  version: 2.1\nsettings:\n  timeout_ms: 5000\n  logging: True\n```\n\n---\n\n## Section 4:"
+      }, {
+        "text": " XML/HTML-like Custom Elements\n\nWe\u0027ll use non-standard elements to ensure your parser can handle structured input outside of standard markdown tags.\n\n`\u003cRESOURCE name\u003d\"TestRunnerInstance\" status\u003d\"READY\"\u003e`\n    `\u003cPROPERTY key\u003d\""
+      }, {
+        "text": "MaxConcurrency\" value\u003d\"4\"/\u003e`\n    `\u003cLOG message\u003d\"Initialization successful.\" timestamp\u003d\"2023-10-27T10:00:00Z\"/\u003e`\n    `\u003c!-- This is an"
+      }, {
+        "text": " XML comment test --\u003e`\n`\u003c/RESOURCE\u003e`\n\n`\u003cdiv\u003e`\n    `\u003ch1\u003eA basic HTML heading check\u003c/h1\u003e`\n    `\u003cp\u003eThis ensures standard HTML elements aren\u0027t accidentally removed.\u003c/p\u003e`\n`\u003c/div\u003e`\n\n***\n"
+      }, {
+        "text": ""
+      }]
+    }],
+    "pendingInputs": [{
+      "text": "",
+      "role": "user"
+    }]
+  }
+}
