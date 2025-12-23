@@ -13,6 +13,9 @@ def send(text):
 
 
 def smart_wait(seconds, last_mtime):
+    # Don't sleep negative amounts
+    if seconds <= 0: return False
+
     print(f"[CAS BRAIN] Sleeping {int(seconds)}s...", end="", flush=True)
     start = time.time()
     while time.time() - start < seconds:
@@ -48,8 +51,6 @@ def process_message(curr_int):
                 mins = int(clean_args)
                 new_int = mins * 60
                 print(f"  >>> [CMD] Frequency: {mins}m")
-
-                # UPDATED CALL: format_freq_confirm
                 send(templates.format_freq_confirm(mins))
             except ValueError:
                 print(f"  >>> [ERROR] Invalid Freq: {args}")
@@ -68,7 +69,6 @@ def process_message(curr_int):
         # 4. SCREENSHOT
         elif key == "screenshot":
             print("  >>> [CMD] Screenshot")
-            # UPDATED CALL: format_screenshot_payload
             payload = templates.format_screenshot_payload(int(curr_int / 60))
             send(f"SCREENSHOT|||{payload}")
 
@@ -77,7 +77,6 @@ def process_message(curr_int):
             if os.path.exists(args):
                 print(f"  >>> [CMD] Upload: {args}")
                 fname = os.path.basename(args)
-                # UPDATED CALL: format_upload_payload
                 payload = templates.format_upload_payload(fname, int(curr_int / 60))
                 send(f"UPLOAD|||{args}|||{payload}")
 
@@ -85,15 +84,26 @@ def process_message(curr_int):
         elif key == "stop":
             stop = True
 
-    if not found_cmd: print("  >>> [INFO] Silence.")
+    if not found_cmd: print("  >>> [INFO] Silence (User/AI interaction detected).")
     return new_int, stop
 
 
 def main():
-    print("[CAS BRAIN] Online. Template Names Synced.")
+    print("[CAS BRAIN] Online. Smart Silence Active.")
     curr_int = cfg.DEFAULT_INTERVAL
     last_mtime = get_mtime()
-    next_hb = time.time()
+
+    # --- NEW STARTUP LOGIC ---
+    # Check how long it has been since the last message
+    time_since_last_msg = time.time() - last_mtime
+
+    if time_since_last_msg < curr_int:
+        # If the conversation is fresh, wait out the remainder of the interval
+        print(f"[CAS BRAIN] Recent conversation detected ({int(time_since_last_msg)}s ago). delaying start.")
+        next_hb = time.time() + (curr_int - time_since_last_msg)
+    else:
+        # If it's been a while, heartbeat immediately
+        next_hb = time.time()
 
     while True:
         now = time.time()
@@ -105,15 +115,22 @@ def main():
             next_hb = now + curr_int
 
         # 2. Wait
-        rem = max(0, next_hb - time.time())
+        rem = next_hb - time.time()
+
         if smart_wait(rem, last_mtime):
-            # Interrupted
+            # Interrupted (User or AI sent a message)
             new_int, stop = process_message(curr_int)
             last_mtime = get_mtime()
             if stop: break
+
             if new_int != curr_int:
                 curr_int = new_int
-                next_hb = time.time() + curr_int
+
+            # --- CRITICAL CHANGE ---
+            # Regardless of whether it was a command or just chat,
+            # we RESET the timer because an interaction just happened.
+            # The system will now stay silent for another full interval.
+            next_hb = time.time() + curr_int
 
 
 if __name__ == "__main__":
