@@ -2,6 +2,7 @@
 CHROME_DEBUG_PORT = "127.0.0.1:9222"
 LATEST_MSG_FILE = "latest_message.md"
 COMMAND_FILE = "command_queue.txt"
+CWD_FILE = "cwd_state.txt"  # <--- ADD THIS LINE
 
 # --- TIMING ---
 DEFAULT_INTERVAL = 10 * 60  # 10 Minutes
