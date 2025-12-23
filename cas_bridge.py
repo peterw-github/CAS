@@ -77,6 +77,7 @@ def main():
     driver = connect_chrome()
 
     # --- ADD THIS TAB SWITCHING LOGIC ---
+    # This code is here because sometimes the actual 'tab' containing the chat interface wasn't in focus for some reason.
     print(f"[BRIDGE] Connected to: {driver.title}")
     if "AI Studio" not in driver.title:
         print("[BRIDGE] Searching for AI Studio tab...")
