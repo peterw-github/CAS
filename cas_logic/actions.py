@@ -26,19 +26,19 @@ def run_system_command(cmd):
     current_wd = get_cwd()
 
     try:
-        # Sanitize HTML entities (Keep your original logic)
         cmd = cmd.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
 
-        # 2. Handle 'cd' commands manually
-        # We have to intercept this because 'cd' in subprocess doesn't persist.
+        # --- QUOTE STRIPPING FOR CD ---
         if cmd.strip().lower().startswith("cd"):
+            # Remove "cd"
             target_dir = cmd[2:].strip()
+            # Remove quotes
+            target_dir = target_dir.replace('"', '').replace("'", "")
 
-            # Handle "cd" (no args) -> print current dir
             if not target_dir:
                 return f"Current Directory: {current_wd}"
 
-            # Calculate new path
+            # Now os.path.join handles it correctly even with spaces
             new_path = os.path.abspath(os.path.join(current_wd, target_dir))
 
             if os.path.isdir(new_path):

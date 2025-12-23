@@ -36,6 +36,9 @@ def process_message(curr_int):
     stop = False
     found_cmd = False
 
+    # BUFFER FOR RESPONSES
+    response_buffer = []
+
     # Regex: Matches `!CAS keyword args`
     matches = re.finditer(r'(?m)^`!CAS\s+(\w+)\s*([^`]*)`', text)
 
@@ -51,26 +54,29 @@ def process_message(curr_int):
                 mins = int(clean_args)
                 new_int = mins * 60
                 print(f"  >>> [CMD] Frequency: {mins}m")
-                send(templates.format_freq_confirm(mins))
+                response_buffer.append(templates.format_freq_confirm(mins))
             except ValueError:
                 print(f"  >>> [ERROR] Invalid Freq: {args}")
 
         # 2. EXEC
         elif key == "exec":
             out = actions.run_system_command(args)
-            send(templates.format_result(args, out))
-            print("  >>> [RES SENT]")
+            response_buffer.append(templates.format_result(args, out))
+            print("  >>> [CMD] Exec Ran")
 
         # 3. PROMPT NOW
         elif key == "prompt_now":
             print("  >>> [CMD] Prompt Now")
-            send(templates.format_prompt_now(int(curr_int / 60)))
+            response_buffer.append(templates.format_prompt_now(int(curr_int / 60)))
 
         # 4. SCREENSHOT
         elif key == "screenshot":
             print("  >>> [CMD] Screenshot")
             payload = templates.format_screenshot_payload(int(curr_int / 60))
-            send(f"SCREENSHOT|||{payload}")
+            # Special handling: Screenshots need a unique prefix for the bridge
+            # We can't batch these easily with text, so we send immediately?
+            # actually, let's keep it simple: Text first.
+            response_buffer.append(f"SCREENSHOT|||{payload}")
 
         # 5. UPLOAD
         elif key == "upload":
@@ -78,13 +84,22 @@ def process_message(curr_int):
                 print(f"  >>> [CMD] Upload: {args}")
                 fname = os.path.basename(args)
                 payload = templates.format_upload_payload(fname, int(curr_int / 60))
-                send(f"UPLOAD|||{args}|||{payload}")
+                response_buffer.append(f"UPLOAD|||{args}|||{payload}")
 
         # 6. STOP
         elif key == "stop":
             stop = True
 
-    if not found_cmd: print("  >>> [INFO] Silence (User/AI interaction detected).")
+    if not found_cmd:
+        print("  >>> [INFO] Silence (User/AI interaction detected).")
+
+    # --- FLUSH BUFFER ---
+    if response_buffer:
+        # Join all responses with a newline
+        full_response = "\n\n".join(response_buffer)
+        send(full_response)
+        print("  >>> [RES SENT BATCH]")
+
     return new_int, stop
 
 
