@@ -68,13 +68,25 @@ def check_for_new_message(driver):
                 print(f"[BRIDGE] New message captured ({len(content)} chars).")
                 return
             time.sleep(0.1)
-    except:
-        pass
+    except Exception as e:
+            print(f"[BRIDGE READ ERROR] {e}")  # <--- Change 'pass' to this
 
 
 def main():
     print("--- CAS BRIDGE (FINAL) ---")
     driver = connect_chrome()
+
+    # --- ADD THIS TAB SWITCHING LOGIC ---
+    print(f"[BRIDGE] Connected to: {driver.title}")
+    if "AI Studio" not in driver.title:
+        print("[BRIDGE] Searching for AI Studio tab...")
+        for handle in driver.window_handles:
+            driver.switch_to.window(handle)
+            if "AI Studio" in driver.title:
+                print(f"[BRIDGE] Found and switched to: {driver.title}")
+                break
+    # ------------------------------------
+
     if not os.path.exists(cfg.COMMAND_FILE): open(cfg.COMMAND_FILE, 'w').close()
 
     while True:
