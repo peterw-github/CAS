@@ -1,6 +1,10 @@
 import subprocess
 import os
+import time
 import cas_config as cfg
+
+# --- CONFIGURATION ---
+MAX_OUTPUT_CHARS = 2000  # Safety limit to prevent browser crashes
 
 
 def get_cwd():
@@ -26,19 +30,19 @@ def run_system_command(cmd):
     current_wd = get_cwd()
 
     try:
+        # Sanitize HTML entities
         cmd = cmd.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
 
-        # --- QUOTE STRIPPING FOR CD ---
+        # 2. Handle 'cd' commands manually (with quote stripping)
         if cmd.strip().lower().startswith("cd"):
-            # Remove "cd"
             target_dir = cmd[2:].strip()
-            # Remove quotes
+            # Strip quotes to fix os.path.join bug
             target_dir = target_dir.replace('"', '').replace("'", "")
 
             if not target_dir:
                 return f"Current Directory: {current_wd}"
 
-            # Now os.path.join handles it correctly even with spaces
+            # Calculate new path
             new_path = os.path.abspath(os.path.join(current_wd, target_dir))
 
             if os.path.isdir(new_path):
@@ -48,18 +52,31 @@ def run_system_command(cmd):
                 return f"Error: Directory not found: {new_path}"
 
         # 3. Handle standard commands
-        # We pass 'cwd=current_wd' so the command runs where we expect it to.
         result = subprocess.run(
             cmd,
             shell=True,
             capture_output=True,
             text=True,
-            cwd=current_wd  # <--- The magic argument
+            cwd=current_wd,
+            encoding='utf-8',
+            errors='replace'  # Prevent crashing on weird characters
         )
 
         output = (result.stdout + result.stderr).strip()
 
-        # Add a helpful footer showing where we are
+        # 4. SAFETY VALVE: Check length
+        if len(output) > MAX_OUTPUT_CHARS:
+            filename = f"output_dump_{int(time.time())}.txt"
+            # Write to the root CAS folder so it's easy to find
+            full_path = os.path.abspath(filename)
+            with open(full_path, "w", encoding="utf-8") as f:
+                f.write(output)
+
+            return (f"[WARNING] Output length ({len(output)} chars) exceeds limit.\n"
+                    f"Saved output to: {full_path}\n"
+                    f"Use '!CAS upload {filename}' to view it if needed.\n\n"
+                    f"[cwd: {current_wd}]")
+
         return f"{output}\n\n[cwd: {current_wd}]" or f"[Done]\n\n[cwd: {current_wd}]"
 
     except Exception as e:
