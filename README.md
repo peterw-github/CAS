@@ -1,3 +1,5 @@
+`<file name="README.md">`
+
 # CAS
 
 <br><Br>
@@ -46,3 +48,6 @@ Allow Cortana to record the screens / monitors for a customizable duration. Curr
 
 **Context Window Management:**<br>
 Allow Cortana to manage her own context window, by allowing her to delete certain blocks of text out of her context window. Currently not practical, as this would be very complex to set up, and there is the potential for identity drift if something goes wrong.
+
+
+`</file>`
