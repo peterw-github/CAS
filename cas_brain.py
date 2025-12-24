@@ -39,14 +39,19 @@ def process_message(curr_int):
     # BUFFER FOR RESPONSES
     response_buffer = []
 
-    # Regex: Matches `!CAS keyword args`
-    matches = re.finditer(r'(?m)^`!CAS\s+(\w+)\s*([^`]*)`', text)
+    # --- FIX 1: REGEX UPDATE ---
+    # Matches: Optional backtick, then !CAS, then command, then args
+    matches = re.finditer(r'(?m)^`?!CAS\s+(\w+)\s+(.*)$', text)
 
     for m in matches:
         found_cmd = True
         key = m.group(1).lower()
-        args = m.group(2).strip()
-        args = args.strip('"\'')
+
+        # RAW ARGS: "   `cd "Folder"`   "
+        raw_args = m.group(2).strip()
+
+        # CLEANUP: Remove leading/trailing backticks if I used them
+        args = raw_args.strip('`').strip()
 
         # 1. FREQUENCY
         if key in ["freq", "frequency", "timer", "prompt_frequency"]:
@@ -65,6 +70,15 @@ def process_message(curr_int):
             response_buffer.append(templates.format_result(args, out))
             print("  >>> [CMD] Exec Ran")
 
+        # --- FIX 2: ADD 'CD' ALIAS ---
+        # AIs often forget to type 'exec cd' and just type 'cd'. This handles that.
+        elif key == "cd":
+            # Pass it through to the system command runner as if it were an exec
+            full_cmd = f"cd {args}"
+            out = actions.run_system_command(full_cmd)
+            response_buffer.append(templates.format_result(full_cmd, out))
+            print(f"  >>> [CMD] CD Alias Ran: {args}")
+
         # 3. PROMPT NOW
         elif key == "prompt_now":
             print("  >>> [CMD] Prompt Now")
@@ -74,14 +88,10 @@ def process_message(curr_int):
         elif key == "screenshot":
             print("  >>> [CMD] Screenshot")
             payload = templates.format_screenshot_payload(int(curr_int / 60))
-            # Special handling: Screenshots need a unique prefix for the bridge
-            # We can't batch these easily with text, so we send immediately?
-            # actually, let's keep it simple: Text first.
             response_buffer.append(f"SCREENSHOT|||{payload}")
 
-            # 5. UPLOAD
+        # 5. UPLOAD
         elif key == "upload":
-            # --- FIX: RESOLVE RELATIVE PATHS ---
             target_path = args
 
             # If it's not absolute, join it with the simulated CWD
@@ -94,8 +104,6 @@ def process_message(curr_int):
                 print(f"  >>> [CMD] Upload: {target_path}")
                 fname = os.path.basename(target_path)
                 payload = templates.format_upload_payload(fname, int(curr_int / 60))
-
-                # Send the FULL RESOLVED PATH to the bridge, so it can find the file
                 response_buffer.append(f"UPLOAD|||{target_path}|||{payload}")
             else:
                 print(f"  >>> [ERROR] File not found: {target_path}")
@@ -109,12 +117,8 @@ def process_message(curr_int):
 
     # --- FLUSH BUFFER ---
     if response_buffer:
-        # Join all responses with a newline
         full_response = "\n\n".join(response_buffer)
-
-        # --- ADD MENU ONCE AT THE END ---
-        full_response += "\n" + templates.get_menu_block()
-
+        full_response += "\n" + templates.get_status_footer(int(curr_int / 60))
         send(full_response)
         print("  >>> [RES SENT BATCH]")
 
@@ -126,23 +130,17 @@ def main():
     curr_int = cfg.DEFAULT_INTERVAL
     last_mtime = get_mtime()
 
-    # --- 1. STARTUP COMMAND CHECK ---
-    # Before calculating delays, check if the current file ALREADY has a command.
-    # We read the file to see if it matches the command regex.
+    # --- STARTUP CHECK (Using the same relaxed Regex) ---
     start_executed = False
     try:
         with open(cfg.LATEST_MSG_FILE, "r", encoding="utf-8") as f:
             startup_text = f.read()
 
-        # Check for the command pattern (same regex as process_message)
-        if re.search(r'(?m)^`!CAS\s+(\w+)', startup_text):
+        # Regex: Optional backtick, !CAS, space, word
+        if re.search(r'(?m)^`?!CAS\s+(\w+)', startup_text):
             print("[CAS BRAIN] Pending command detected at startup. Processing immediately.")
-
-            # Execute the command
             new_int, stop = process_message(curr_int)
-            if stop: return  # Exit if the startup command was '!CAS stop'
-
-            # Update state so we don't heartbeat immediately
+            if stop: return
             if new_int != curr_int: curr_int = new_int
             last_mtime = get_mtime()
             next_hb = time.time() + curr_int
@@ -151,42 +149,27 @@ def main():
     except Exception as e:
         print(f"[CAS BRAIN] Startup check error: {e}")
 
-    # --- 2. NORMAL STARTUP LOGIC ---
-    # Only calculate delays if we DIDN'T just execute a command.
     if not start_executed:
         time_since_last_msg = time.time() - last_mtime
-
         if time_since_last_msg < curr_int:
-            # If the conversation is fresh, wait out the remainder of the interval
             print(f"[CAS BRAIN] Recent conversation detected ({int(time_since_last_msg)}s ago). delaying start.")
             next_hb = time.time() + (curr_int - time_since_last_msg)
         else:
-            # If it's been a while, heartbeat immediately
             next_hb = time.time()
 
-    # --- 3. MAIN LOOP ---
     while True:
         now = time.time()
-
-        # Heartbeat
         if now >= next_hb:
             send(templates.format_heartbeat(int(curr_int / 60)))
             print("[CAS BRAIN] Heartbeat Sent.")
             next_hb = now + curr_int
 
-        # Wait
         rem = next_hb - time.time()
-
         if smart_wait(rem, last_mtime):
-            # Interrupted (User or AI sent a message)
             new_int, stop = process_message(curr_int)
             last_mtime = get_mtime()
             if stop: break
-
-            if new_int != curr_int:
-                curr_int = new_int
-
-            # Reset timer after interaction
+            if new_int != curr_int: curr_int = new_int
             next_hb = time.time() + curr_int
 
 
