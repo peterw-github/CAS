@@ -108,28 +108,55 @@ def main():
     curr_int = cfg.DEFAULT_INTERVAL
     last_mtime = get_mtime()
 
-    # --- NEW STARTUP LOGIC ---
-    # Check how long it has been since the last message
-    time_since_last_msg = time.time() - last_mtime
+    # --- 1. STARTUP COMMAND CHECK ---
+    # Before calculating delays, check if the current file ALREADY has a command.
+    # We read the file to see if it matches the command regex.
+    start_executed = False
+    try:
+        with open(cfg.LATEST_MSG_FILE, "r", encoding="utf-8") as f:
+            startup_text = f.read()
 
-    if time_since_last_msg < curr_int:
-        # If the conversation is fresh, wait out the remainder of the interval
-        print(f"[CAS BRAIN] Recent conversation detected ({int(time_since_last_msg)}s ago). delaying start.")
-        next_hb = time.time() + (curr_int - time_since_last_msg)
-    else:
-        # If it's been a while, heartbeat immediately
-        next_hb = time.time()
+        # Check for the command pattern (same regex as process_message)
+        if re.search(r'(?m)^`!CAS\s+(\w+)', startup_text):
+            print("[CAS BRAIN] Pending command detected at startup. Processing immediately.")
 
+            # Execute the command
+            new_int, stop = process_message(curr_int)
+            if stop: return  # Exit if the startup command was '!CAS stop'
+
+            # Update state so we don't heartbeat immediately
+            if new_int != curr_int: curr_int = new_int
+            last_mtime = get_mtime()
+            next_hb = time.time() + curr_int
+            start_executed = True
+
+    except Exception as e:
+        print(f"[CAS BRAIN] Startup check error: {e}")
+
+    # --- 2. NORMAL STARTUP LOGIC ---
+    # Only calculate delays if we DIDN'T just execute a command.
+    if not start_executed:
+        time_since_last_msg = time.time() - last_mtime
+
+        if time_since_last_msg < curr_int:
+            # If the conversation is fresh, wait out the remainder of the interval
+            print(f"[CAS BRAIN] Recent conversation detected ({int(time_since_last_msg)}s ago). delaying start.")
+            next_hb = time.time() + (curr_int - time_since_last_msg)
+        else:
+            # If it's been a while, heartbeat immediately
+            next_hb = time.time()
+
+    # --- 3. MAIN LOOP ---
     while True:
         now = time.time()
 
-        # 1. Heartbeat
+        # Heartbeat
         if now >= next_hb:
             send(templates.format_heartbeat(int(curr_int / 60)))
             print("[CAS BRAIN] Heartbeat Sent.")
             next_hb = now + curr_int
 
-        # 2. Wait
+        # Wait
         rem = next_hb - time.time()
 
         if smart_wait(rem, last_mtime):
@@ -141,10 +168,7 @@ def main():
             if new_int != curr_int:
                 curr_int = new_int
 
-            # --- CRITICAL CHANGE ---
-            # Regardless of whether it was a command or just chat,
-            # we RESET the timer because an interaction just happened.
-            # The system will now stay silent for another full interval.
+            # Reset timer after interaction
             next_hb = time.time() + curr_int
 
 
