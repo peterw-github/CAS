@@ -97,6 +97,10 @@ def process_message(curr_int):
     if response_buffer:
         # Join all responses with a newline
         full_response = "\n\n".join(response_buffer)
+
+        # --- ADD MENU ONCE AT THE END ---
+        full_response += "\n" + templates.get_menu_block()
+
         send(full_response)
         print("  >>> [RES SENT BATCH]")
 

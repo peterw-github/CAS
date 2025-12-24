@@ -48,8 +48,6 @@ def format_screenshot_payload(interval_minutes):
 
 **Message:**
 A screenshot has been attached, that shows what is currently on all three monitors.
-
-{get_menu_block()}
 """
 
 
@@ -61,8 +59,6 @@ def format_upload_payload(filename, interval_minutes):
 
 **Message:**
 File `{filename}` has been attached as requested.
-
-{get_menu_block()}
 """
 
 def format_result(cmd, output):
@@ -78,6 +74,4 @@ def format_freq_confirm(interval_minutes):
     return f"""
 **[CAS SYSTEM]**
 `CAS Prompt Frequency set to {interval_minutes} minutes.`
-
-{get_menu_block()}
 """

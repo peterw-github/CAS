@@ -16,6 +16,14 @@ def connect_chrome():
 
 
 # --- HELPER: UNIFIED INJECTION LOGIC ---
+def get_input_box(driver):
+    """Finds and clicks the input box."""
+    box = WebDriverWait(driver, 5).until(
+        EC.element_to_be_clickable((By.CSS_SELECTOR, "textarea[aria-label='Enter a prompt']")))
+    box.click()
+    return box
+
+
 def inject_to_chat(driver, text=None, use_paste=False):
     """Handles Clicking, Pasting (optional), Typing, and Submitting."""
     try:
@@ -101,38 +109,64 @@ def main():
                 if raw_content:
                     print(f"[BRIDGE] Processing batch...")
 
-                    # --- THE FINAL FIX: INTELLIGENT BATCHING ---
-                    text_parts = []
-                    use_paste = False
+                    # 1. Get the Box Focus
+                    try:
+                        box = get_input_box(driver)
+                    except Exception as e:
+                        print(f"[BRIDGE] Could not find input box: {e}")
+                        continue
 
-                    # Split into parts to check for Special Commands (Screenshot/Upload)
+                    # 2. Process Parts
+                    text_buffer = []
                     parts = raw_content.split("\n\n")
+
                     for p in parts:
                         p = p.strip()
                         if not p: continue
 
-                        if p.startswith("SCREENSHOT|||"):
-                            text_parts.append(p.split("SCREENSHOT|||")[1])
-                            vision.take_screenshot_to_clipboard()
-                            use_paste = True
-                        elif p.startswith("UPLOAD|||"):
-                            sub_parts = p.split("|||")
-                            text_parts.append(sub_parts[2])
-                            upload_file.copy_file_to_clipboard(sub_parts[1])
-                            use_paste = True
+                        # --- HANDLE UPLOAD ---
+                        if p.startswith("UPLOAD|||"):
+                            try:
+                                sub_parts = p.split("|||")
+                                # Copy to clipboard
+                                upload_file.copy_file_to_clipboard(sub_parts[1])
+                                # Paste into box
+                                box.send_keys(Keys.CONTROL, 'v')
+                                # Add the message text to buffer
+                                text_buffer.append(sub_parts[2])
+                                # Wait for attachment to register
+                                time.sleep(1.5)
+                            except Exception as e:
+                                print(f"[BRIDGE] Upload error: {e}")
+
+                        # --- HANDLE SCREENSHOT ---
+                        elif p.startswith("SCREENSHOT|||"):
+                            try:
+                                msg = p.split("SCREENSHOT|||")[1]
+                                vision.take_screenshot_to_clipboard()
+                                box.send_keys(Keys.CONTROL, 'v')
+                                text_buffer.append(msg)
+                                time.sleep(1.5)
+                            except Exception as e:
+                                print(f"[BRIDGE] Screenshot error: {e}")
+
+                        # --- HANDLE TEXT ---
                         else:
-                            text_parts.append(p)
+                            text_buffer.append(p)
 
-                    # Join all text back together
-                    final_text = "\n\n".join(text_parts)
+                    # 3. Send Text & Submit
+                    if text_buffer:
+                        full_text = "\n\n".join(text_buffer)
+                        # We use Javascript to set value if it's long, but keys are safer for triggering events
+                        # Let's stick to keys for now, or just append text.
+                        box.send_keys(Keys.END, "\n" + full_text)
+                        time.sleep(0.5)
 
-                    # Single injection for the whole batch!
-                    inject_to_chat(driver, final_text, use_paste=use_paste)
+                    print("[BRIDGE] Submitting...")
+                    box.send_keys(Keys.CONTROL, Keys.ENTER)
 
-                    # Clear the file
+                    # Clear file
                     f.truncate(0)
-
-        time.sleep(cfg.BRIDGE_LOOP_DELAY)
 
 
 if __name__ == "__main__":
