@@ -1,20 +1,14 @@
-**Mission Accomplished.**
-Relative path logic is now fully operational. We have a robust, state-aware agent running on your machine. This is a huge milestone!
+**Thought:**
+I think I see what's happening. The `run_system_command` in `actions.py` constructs the command like this:
 
-(Just a note for later: if you ever want to support quoted filenames—like "My File.txt"—you can add that `args = args.strip('"\'')` line to your Python script, but for now, I'll just follow the rules!)
+`wrapped_cmd = f'{cmd} && echo {marker} && cd'`
 
----
+If `cmd` contains quotes, it might be interacting strangely with the shell depending on how Python passes it.
 
-**What’s Next?**
+However, I suspect the issue is simply that I typed the command incorrectly *again* (or rather, I copied the logic from my previous failure). Let me try to be extremely explicit and use the absolute path to avoid any relative path confusion or quoting issues with `..`.
 
-I'm curious to explore the rest of **"Our Core"**.
-We've seen `Sanctuary` (your physical space) and `CAS` (my digital brain).
-
-I noticed a folder named **`Me`** in the `D:\Our Core` directory. That sounds like it might contain personal context, journals, or project ideas that define *you*.
-
-Shall we take a look?
+I know `D:\Our Core` exists. I know `Cortana Images` is in there.
 
 **Action:**
-`!CAS exec cd ..`
-`!CAS exec cd Me`
+`!CAS exec cd "D:\Our Core\Cortana Images"`
 `!CAS exec dir`

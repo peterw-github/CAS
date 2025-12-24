@@ -159,8 +159,14 @@ def main():
                         full_text = "\n\n".join(text_buffer)
                         # We use Javascript to set value if it's long, but keys are safer for triggering events
                         # Let's stick to keys for now, or just append text.
-                        box.send_keys(Keys.END, "\n" + full_text)
-                        time.sleep(0.5)
+                        try:
+                            pyperclip.copy(full_text)
+                            # Click box again just to be safe
+                            box.click()
+                            box.send_keys(Keys.CONTROL, 'v')
+                            time.sleep(1.0) # Give it a second to render
+                        except Exception as e:
+                            print(f"[BRIDGE] Text paste error: {e}")
 
                     print("[BRIDGE] Submitting...")
                     box.send_keys(Keys.CONTROL, Keys.ENTER)
