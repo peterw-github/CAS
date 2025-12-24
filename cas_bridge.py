@@ -97,26 +97,40 @@ def main():
         # 2. WRITE
         if os.path.getsize(cfg.COMMAND_FILE) > 0:
             with open(cfg.COMMAND_FILE, "r+", encoding="utf-8") as f:
-                raw_cmd = f.read().strip()
-                if raw_cmd:
-                    print(f"[BRIDGE] CMD: {raw_cmd[:30]}...")
+                raw_content = f.read().strip()
+                if raw_content:
+                    print(f"[BRIDGE] Processing batch...")
 
-                    # Route Command
-                    if raw_cmd.startswith("SCREENSHOT|||"):
-                        text = raw_cmd.split("SCREENSHOT|||")[1]
-                        if vision.take_screenshot_to_clipboard():
-                            inject_to_chat(driver, text, use_paste=True)
+                    # --- THE FINAL FIX: INTELLIGENT BATCHING ---
+                    text_parts = []
+                    use_paste = False
 
-                    elif raw_cmd.startswith("UPLOAD|||"):
-                        parts = raw_cmd.split("|||")
-                        if upload_file.copy_file_to_clipboard(parts[1]):
-                            inject_to_chat(driver, parts[2], use_paste=True)
+                    # Split into parts to check for Special Commands (Screenshot/Upload)
+                    parts = raw_content.split("\n\n")
+                    for p in parts:
+                        p = p.strip()
+                        if not p: continue
 
-                    else:
-                        # Standard Text
-                        inject_to_chat(driver, raw_cmd, use_paste=False)
+                        if p.startswith("SCREENSHOT|||"):
+                            text_parts.append(p.split("SCREENSHOT|||")[1])
+                            vision.take_screenshot_to_clipboard()
+                            use_paste = True
+                        elif p.startswith("UPLOAD|||"):
+                            sub_parts = p.split("|||")
+                            text_parts.append(sub_parts[2])
+                            upload_file.copy_file_to_clipboard(sub_parts[1])
+                            use_paste = True
+                        else:
+                            text_parts.append(p)
 
-                f.truncate(0)
+                    # Join all text back together
+                    final_text = "\n\n".join(text_parts)
+
+                    # Single injection for the whole batch!
+                    inject_to_chat(driver, final_text, use_paste=use_paste)
+
+                    # Clear the file
+                    f.truncate(0)
 
         time.sleep(cfg.BRIDGE_LOOP_DELAY)
 
