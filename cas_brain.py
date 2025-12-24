@@ -46,6 +46,7 @@ def process_message(curr_int):
         found_cmd = True
         key = m.group(1).lower()
         args = m.group(2).strip()
+        args = args.strip('"\'')
 
         # 1. FREQUENCY
         if key in ["freq", "frequency", "timer", "prompt_frequency"]:
@@ -78,13 +79,26 @@ def process_message(curr_int):
             # actually, let's keep it simple: Text first.
             response_buffer.append(f"SCREENSHOT|||{payload}")
 
-        # 5. UPLOAD
+            # 5. UPLOAD
         elif key == "upload":
-            if os.path.exists(args):
-                print(f"  >>> [CMD] Upload: {args}")
-                fname = os.path.basename(args)
+            # --- FIX: RESOLVE RELATIVE PATHS ---
+            target_path = args
+
+            # If it's not absolute, join it with the simulated CWD
+            if not os.path.isabs(target_path):
+                simulated_cwd = actions.get_cwd()
+                target_path = os.path.join(simulated_cwd, target_path)
+
+            # Now check existence using the resolved path
+            if os.path.exists(target_path):
+                print(f"  >>> [CMD] Upload: {target_path}")
+                fname = os.path.basename(target_path)
                 payload = templates.format_upload_payload(fname, int(curr_int / 60))
-                response_buffer.append(f"UPLOAD|||{args}|||{payload}")
+
+                # Send the FULL RESOLVED PATH to the bridge, so it can find the file
+                response_buffer.append(f"UPLOAD|||{target_path}|||{payload}")
+            else:
+                print(f"  >>> [ERROR] File not found: {target_path}")
 
         # 6. STOP
         elif key == "stop":
