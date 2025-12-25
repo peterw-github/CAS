@@ -8,7 +8,7 @@ def get_menu_block():
 **Available Commands:**
 * `!CAS prompt_frequency [X]`
 * `!CAS exec [cmd]`
-* `!CAS upload [path]`
+* `!CAS upload_file [path]`
 * `!CAS screenshot`
 * `!CAS prompt_now`
 * `!CAS stop`
@@ -24,7 +24,7 @@ def get_status_footer(interval_minutes):
 {get_menu_block()}
 """
 
-# --- CLEANED RESPONSES (No Headers) ---
+# --- TEMPLATES FOR COMMANDS THAT PROBABLY DON'T NEED MENU BLOCK, AS THEY'RE RUN FREQUENTLY ---
 
 def format_screenshot_payload(interval_minutes): # Arg kept for compatibility, but unused
     return f"""
@@ -53,7 +53,8 @@ def format_freq_confirm(interval_minutes):
 Frequency updated to {interval_minutes} minutes.
 """
 
-# --- KEEP HEARTBEAT/PROMPT_NOW AS IS (Since they are standalone) ---
+
+# --- CONTAINS MENU BLOCKS ---
 def format_heartbeat(interval_minutes):
     return f"""
 **[CAS HEARTBEAT]**

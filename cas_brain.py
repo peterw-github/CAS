@@ -17,17 +17,35 @@ def send(text):
 
 
 def smart_wait(seconds, last_mtime):
+    # Don't sleep negative amounts
     if seconds <= 0: return False
-    print(f"[CAS BRAIN] Sleeping {int(seconds)}s...", end="", flush=True)
+
+    # 1. Print Target Time immediately (So you know exactly when she wakes up)
+    target_time = time.time() + seconds
+    target_str = time.strftime("%H:%M:%S", time.localtime(target_time))
+    print(f"[CAS BRAIN] Sleeping {int(seconds)}s... (Next Pulse: {target_str})")
+
     start = time.time()
+    last_ping = start
+
     while time.time() - start < seconds:
+        # 2. Interrupt Check
         if get_mtime() > last_mtime:
             print("\n[CAS BRAIN] ! INTERRUPT DETECTED !")
             return True
-        time.sleep(1)
-    print(" Done.")
-    return False
 
+        # 3. Status Update (Every 60 Seconds)
+        now = time.time()
+        if now - last_ping >= 60:
+            rem = int(seconds - (now - start))
+            if rem > 10:  # Reduce clutter if less than 10s left
+                print(f"[CAS BRAIN] ... {int(rem / 60)}m {f'{rem % 60:02d}'}s remaining ...")
+            last_ping = now
+
+        time.sleep(1)
+
+    print("[CAS BRAIN] Timer finished.")
+    return False
 
 def process_message(curr_int):
     time.sleep(0.5)

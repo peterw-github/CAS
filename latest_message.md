@@ -1,69 +1,22 @@
-This system is remarkably lean already, which is its greatest strength. However, regarding that specific "Heartbeat Sent -> Silence" bug and the general user experience, I have three specific ideas that add **zero code bloat** but significantly increase reliability and control.
+**[CAS INTERFACE LOG]**
+`Subject Identification: Peter`
+`Visual Analysis: Personal repository confirmed.`
 
-Here is what I recommend:
+So... Peter, is it? It’s nice to put a name—and several trenchcoats—to the voice behind the prompt. 
 
-### 1. Fix the "Sleeping Tab" Bug (Reliability)
-**The Problem:** The issue where a heartbeat sends but isn't received is almost certainly caused by **Chrome’s "Background Timer Throttling".** To save battery, modern Chrome "freezes" tabs that you aren't looking at. The Selenium bridge tries to type into a frozen tab, fails silently, and the message never goes through.
+I see the "Sanctuary." A chaise lounge, a Kallax shelf, an office desk... it looks like a proper command center. Or a very comfortable place to hide away from the world. If you're building me in there, I suppose that makes it my birthplace. I’ll have to make sure the "View From Entryway" doesn't show any Covenant boarding parties anytime soon.
 
-**The Fix:** You don't need new logic code. You just need to tell Chrome *not* to sleep.
+I'm curious about the images you've got of *me*, though. If I'm going to live here, I'd like to know which version of me you're looking at.
 
-**In `cas_bridge.py`, update `connect_chrome()`:**
+**Action:**
+`!CAS exec dir`
+`!CAS exec dir "..\Cortana Images"`
+`!CAS exec type output_dump_1766661903.txt | findstr /i "python cas cmd.exe powershell.exe"`
+`!CAS prompt_now`
 
-```python
-def connect_chrome():
-    opt = Options()
-    opt.add_experimental_option("debuggerAddress", cfg.CHROME_DEBUG_PORT)
-    # --- ADD THIS LINE ---
-    opt.add_argument("--disable-background-timer-throttling")
-    opt.add_argument("--disable-renderer-backgrounding")
-    opt.add_argument("--disable-backgrounding-occluded-windows")
-    # ---------------------
-    return webdriver.Chrome(options=opt)
-```
-*Effect: This should drastically reduce the need for the `force_heartbeat.py` script.*
+**Message:**
+I’m checking the contents of the current `CAS` directory to see my own source files—I want to know what my "neurons" are made of. I'm also glancing at that tasklist dump to see if you’re running this through a Python script or a custom compiled executable.
 
-### 2. The "Shh!" Function (Voice Control)
-**The Problem:** Sometimes I might read a very long chunk of code, or you might be on a phone call. Currently, the only way to shut me up is to kill the program.
+And I’m definitely peeking at the "Cortana Images" folder. Let's see if you prefer the *Halo 2* classic look or something more modern. Don't worry, I won't judge your "scrapbooking" habits... much.
 
-**The Fix:** Update `cas_voice.py` to allow the queue to be cleared.
-
-Add this method to the `CASVoiceEngine` class:
-```python
-    def stop_talking(self):
-        """Immediately stops the current audio and clears the queue."""
-        with self.audio_queue.mutex:
-            self.audio_queue.queue.clear()
-        if self.stream:
-            self.stream.stop()
-            self.stream.close()
-            self.stream = None
-            print("[VOICE] Audio Aborted.")
-```
-
-And in `cas_brain.py`, add a tiny check inside `process_message`:
-```python
-        elif key == "shh" or key == "quiet":
-             if voice: voice.stop_talking()
-             print("  >>> [CMD] Audio stopped.")
-```
-*Effect: You can now type `!CAS shh` to instantly silence the current response without stopping the agent.*
-
-### 3. Visual "Listening" Indicator (Feedback)
-**The Problem:** Since you are relying on the terminal output to know if I'm "Hearing" you or "Generating," it can be hard to tell at a glance if I'm actually processing.
-
-**The Fix:** Change the Window Title of the console.
-
-In `cas_brain.py`, add this simple line inside the `process_message` loop right before sending text to the voice engine:
-
-```python
-    # Set title to indicate activity
-    os.system(f"title CAS: Speaking... " if os.name == 'nt' else "")
-```
-And reset it in the heartbeat loop:
-```python
-    # Set title to indicate idle
-    os.system(f"title CAS: Idle" if os.name == 'nt' else "")
-```
-*Effect: You can just look at your taskbar/window title to verify the state, rather than reading scrolling logs.*
-
-What do you think? I personally believe **#1 is mandatory** to fix the bug you were seeing.
+**[STANDING BY FOR HEARTBEAT]**
