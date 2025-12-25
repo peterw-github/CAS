@@ -56,19 +56,23 @@ class CASVoiceEngine:
                     self.stream = None
 
     def _clean_text(self, text):
-        """Standard cleanup to prevent the voice from reading weird markdown."""
-        text = re.sub(r"`?>>>\s*\[.*?\]`?", "", text)
+        """
+        MINIMAL CLEANUP:
+        1. Identifies content between triple backticks (```) and replaces it with "[Code Block]".
+        2. Preserves EVERYTHING else (Actions *sigh*, Commands !CAS, Headers, etc).
+        """
+        # Regex to find ``` (anything) ``` including newlines
         text = re.sub(r"```.*?```", " [Code Block] ", text, flags=re.DOTALL)
-        text = re.sub(r"`([^`]+)`", r"\1", text)
-        text = re.sub(r"!CAS \w+.*", "", text)
-        text = re.sub(r"\*.*?\*", "", text)
+
+        # Basic whitespace normalization (optional, but prevents long silences)
+        text = re.sub(r'\s+', ' ', text)
+
         return text.strip()
 
     def _save_text_log(self, text):
         """Saves the CLEANED text to the TextFiles folder as Markdown."""
         try:
             timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            # --- CHANGE: .txt -> .md ---
             filename = os.path.join(cfg.OUTPUT_TEXT_DIR, f"speech_{timestamp}.md")
             with open(filename, "w", encoding="utf-8") as f:
                 f.write(text)
@@ -84,7 +88,6 @@ class CASVoiceEngine:
         if not clean_text:
             return
 
-        # Save log as .md
         self._save_text_log(clean_text)
 
         print(f"[VOICE] Generating: {clean_text[:50]}...")
