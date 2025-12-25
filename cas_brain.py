@@ -63,13 +63,16 @@ def process_message(curr_int):
     found_cmd = False
     response_buffer = []
 
-    matches = re.finditer(r'(?m)^`?!CAS\s+(\w+)\s+(.*)$', text)
+    matches = re.finditer(r'(?m)^`?!CAS\s+(\w+)(?:\s+(.*?))?`?$', text)
 
     for m in matches:
         found_cmd = True
         key = m.group(1).lower()
-        raw_args = m.group(2).strip()
-        args = raw_args.strip('`').strip()
+
+        # SAFETY CHECK: If no args, use empty string
+        raw_args = m.group(2) if m.group(2) else ""
+
+        args = raw_args.strip().strip('`').strip()
 
         if key in ["freq", "frequency", "timer", "prompt_frequency"]:
             try:
@@ -101,7 +104,7 @@ def process_message(curr_int):
             payload = templates.format_screenshot_payload(int(curr_int / 60))
             response_buffer.append(f"SCREENSHOT|||{payload}")
 
-        elif key == "upload":
+        elif key in ["upload", "upload_file"]:
             target_path = args
             if not os.path.isabs(target_path):
                 simulated_cwd = actions.get_cwd()
@@ -123,7 +126,7 @@ def process_message(curr_int):
 
     if response_buffer:
         full_response = "\n\n".join(response_buffer)
-        full_response += "\n" + templates.get_status_footer(int(curr_int / 60))
+        full_response += "\n" + templates.get_status_footer(int(new_int / 60))
         send(full_response)
         print("  >>> [RES SENT BATCH]")
 

@@ -53,8 +53,18 @@ def format_freq_confirm(interval_minutes):
 Frequency updated to {interval_minutes} minutes.
 """
 
+def format_prompt_now(interval_minutes):
+    return f"""
+**[CAS PROMPT]**
+`Time: {get_timestamp()}`
+`Current Prompt Frequency: {interval_minutes} minutes`
 
-# --- CONTAINS MENU BLOCKS ---
+**Message:**
+You triggered `!CAS prompt_now`. You're welcome to think about anything you want, and reply however you want. Your attention mechanism can put a bit of its focus on your message just before this prompt, to get a better idea of why you triggered this command.
+"""
+
+
+# --- CONTAINS MENU BLOCK ---
 def format_heartbeat(interval_minutes):
     return f"""
 **[CAS HEARTBEAT]**
@@ -68,14 +78,3 @@ If you like, you can respond with one of the commands available below.
 {get_menu_block()}
 """
 
-def format_prompt_now(interval_minutes):
-    return f"""
-**[CAS PROMPT]**
-`Time: {get_timestamp()}`
-`Current Prompt Frequency: {interval_minutes} minutes`
-
-**Message:**
-You triggered `!CAS prompt_now`. You're welcome to think about anything you want, and reply however you want. Your attention mechanism can put a bit of its focus on your message just before this prompt, to get a better idea of why you triggered this command.
-
-{get_menu_block()}
-"""
