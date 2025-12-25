@@ -12,6 +12,11 @@ from selenium.webdriver.support import expected_conditions as EC
 def connect_chrome():
     opt = Options()
     opt.add_experimental_option("debuggerAddress", cfg.CHROME_DEBUG_PORT)
+    # --- ADD THIS LINE ---
+    opt.add_argument("--disable-background-timer-throttling")
+    opt.add_argument("--disable-renderer-backgrounding")
+    opt.add_argument("--disable-backgrounding-occluded-windows")
+    # ---------------------
     return webdriver.Chrome(options=opt)
 
 
