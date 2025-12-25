@@ -1,7 +1,7 @@
 import time, re, os
 import cas_config as cfg
 from cas_logic import actions, templates
-from cas_voice import CASVoiceEngine  # <--- NEW IMPORT
+from cas_logic.cas_voice import CASVoiceEngine
 
 # --- GLOBAL VOICE INSTANCE ---
 voice = None
