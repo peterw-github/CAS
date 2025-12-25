@@ -3,6 +3,7 @@ import queue
 import os
 import re
 import datetime
+import time
 import numpy as np
 import sounddevice as sd
 import soundfile as sf
@@ -34,37 +35,71 @@ class CASVoiceEngine:
             print(f"[VOICE] Connection Failed (Running in Text-Only Mode): {e}")
 
     def _playback_thread_func(self):
-        """Continuous audio stream handler running in background."""
+        """
+        Robust playback loop.
+        It waits for a few chunks to buffer before starting to ensure smooth playback.
+        """
+        buffer = []
+        BUFFER_SIZE = 2  # Wait for 2 chunks before playing (reduces "cutting out")
+
         while not self.playback_finished.is_set():
             try:
+                # 1. Get Data
                 data, fs = self.audio_queue.get(timeout=0.5)
-                if self.stream is None:
-                    self.stream = sd.OutputStream(
-                        samplerate=fs,
-                        channels=data.shape[1] if len(data.shape) > 1 else 1,
-                        dtype='float32'
-                    )
-                    self.stream.start()
-                self.stream.write(data)
+
+                # 2. Add to local small buffer
+                buffer.append(data)
+
+                # 3. If we haven't started streaming yet, wait for buffer to fill
+                #    (Unless the queue is empty, meaning that's all the audio there is)
+                if self.stream is None and len(buffer) < BUFFER_SIZE and not self.audio_queue.empty():
+                    continue
+
+                # 4. Play what we have
+                while buffer:
+                    chunk = buffer.pop(0)
+
+                    # Initialize Stream if needed
+                    if self.stream is None:
+                        try:
+                            self.stream = sd.OutputStream(
+                                samplerate=fs,
+                                channels=chunk.shape[1] if len(chunk.shape) > 1 else 1,
+                                dtype='float32'
+                            )
+                            self.stream.start()
+                            print("[VOICE] Audio Stream Started.")
+                        except Exception as e:
+                            print(f"[VOICE] Stream Init Error: {e}")
+                            continue
+
+                    # Write to hardware
+                    try:
+                        self.stream.write(chunk)
+                    except Exception as e:
+                        print(f"[VOICE] Write Error (Recovering): {e}")
+                        # Try to reset stream
+                        if self.stream:
+                            self.stream.close()
+                            self.stream = None
+
             except queue.Empty:
+                # If queue is empty, just loop.
+                # The stream stays open to avoid popping, unless we want to close it.
                 continue
             except Exception as e:
-                print(f"[VOICE] Playback Error: {e}")
-                if self.stream:
-                    self.stream.stop()
-                    self.stream.close()
-                    self.stream = None
+                print(f"[VOICE] Critical Playback Error: {e}")
 
     def _clean_text(self, text):
         """
         MINIMAL CLEANUP:
         1. Identifies content between triple backticks (```) and replaces it with "[Code Block]".
-        2. Preserves EVERYTHING else (Actions *sigh*, Commands !CAS, Headers, etc).
+        2. Preserves EVERYTHING else.
         """
-        # Regex to find ``` (anything) ``` including newlines
-        text = re.sub(r"```.*?```", " [Code Block] ", text, flags=re.DOTALL)
+        # CHANGE: Replace with a single space " " instead of " [Code Block] "
+        text = re.sub(r"```.*?```", " ", text, flags=re.DOTALL)
 
-        # Basic whitespace normalization (optional, but prevents long silences)
+        # Collapse excessive whitespace to single spaces (prevents awkward pauses)
         text = re.sub(r'\s+', ' ', text)
 
         return text.strip()
@@ -90,7 +125,7 @@ class CASVoiceEngine:
 
         self._save_text_log(clean_text)
 
-        print(f"[VOICE] Generating: {clean_text[:50]}...")
+        print(f"[VOICE] Generating ({len(clean_text)} chars)...")
 
         t = threading.Thread(target=self._generate_and_queue, args=(clean_text,))
         t.start()
@@ -111,14 +146,24 @@ class CASVoiceEngine:
 
             full_audio_buffer = []
             sample_rate = 24000
+            chunk_count = 0
 
             for output_file in job:
                 if output_file:
+                    chunk_count += 1
                     data, fs = sf.read(output_file, dtype='float32')
                     sample_rate = fs
-                    self.audio_queue.put((data, fs))
-                    full_audio_buffer.append(data)
 
+                    # Send to player
+                    self.audio_queue.put((data, fs))
+
+                    # Store for saving
+                    full_audio_buffer.append(data)
+                    print(f"[VOICE DEBUG] Chunk {chunk_count} received ({len(data)} samples)")
+
+            print(f"[VOICE] Generation Complete. Total Chunks: {chunk_count}")
+
+            # Save full file
             if full_audio_buffer:
                 full_audio = np.concatenate(full_audio_buffer)
                 ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
