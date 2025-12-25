@@ -1,6 +1,10 @@
 import time, re, os
 import cas_config as cfg
 from cas_logic import actions, templates
+from cas_voice import CASVoiceEngine  # <--- NEW IMPORT
+
+# --- GLOBAL VOICE INSTANCE ---
+voice = None
 
 
 def get_mtime():
@@ -13,9 +17,7 @@ def send(text):
 
 
 def smart_wait(seconds, last_mtime):
-    # Don't sleep negative amounts
     if seconds <= 0: return False
-
     print(f"[CAS BRAIN] Sleeping {int(seconds)}s...", end="", flush=True)
     start = time.time()
     while time.time() - start < seconds:
@@ -32,28 +34,25 @@ def process_message(curr_int):
     with open(cfg.LATEST_MSG_FILE, "r", encoding="utf-8") as f:
         text = f.read()
 
+    # --- INJECTION POINT: VOICE ---
+    if voice:
+        # We pass the raw text. The voice engine handles cleaning it.
+        voice.speak(text)
+    # ------------------------------
+
     new_int = curr_int
     stop = False
     found_cmd = False
-
-    # BUFFER FOR RESPONSES
     response_buffer = []
 
-    # --- FIX 1: REGEX UPDATE ---
-    # Matches: Optional backtick, then !CAS, then command, then args
     matches = re.finditer(r'(?m)^`?!CAS\s+(\w+)\s+(.*)$', text)
 
     for m in matches:
         found_cmd = True
         key = m.group(1).lower()
-
-        # RAW ARGS: "   `cd "Folder"`   "
         raw_args = m.group(2).strip()
-
-        # CLEANUP: Remove leading/trailing backticks if I used them
         args = raw_args.strip('`').strip()
 
-        # 1. FREQUENCY
         if key in ["freq", "frequency", "timer", "prompt_frequency"]:
             try:
                 clean_args = args.replace("`", "").replace("[", "").replace("]", "").strip()
@@ -64,42 +63,32 @@ def process_message(curr_int):
             except ValueError:
                 print(f"  >>> [ERROR] Invalid Freq: {args}")
 
-        # 2. EXEC
         elif key == "exec":
             out = actions.run_system_command(args)
             response_buffer.append(templates.format_result(args, out))
             print("  >>> [CMD] Exec Ran")
 
-        # --- FIX 2: ADD 'CD' ALIAS ---
-        # AIs often forget to type 'exec cd' and just type 'cd'. This handles that.
         elif key == "cd":
-            # Pass it through to the system command runner as if it were an exec
             full_cmd = f"cd {args}"
             out = actions.run_system_command(full_cmd)
             response_buffer.append(templates.format_result(full_cmd, out))
             print(f"  >>> [CMD] CD Alias Ran: {args}")
 
-        # 3. PROMPT NOW
         elif key == "prompt_now":
             print("  >>> [CMD] Prompt Now")
             response_buffer.append(templates.format_prompt_now(int(curr_int / 60)))
 
-        # 4. SCREENSHOT
         elif key == "screenshot":
             print("  >>> [CMD] Screenshot")
             payload = templates.format_screenshot_payload(int(curr_int / 60))
             response_buffer.append(f"SCREENSHOT|||{payload}")
 
-        # 5. UPLOAD
         elif key == "upload":
             target_path = args
-
-            # If it's not absolute, join it with the simulated CWD
             if not os.path.isabs(target_path):
                 simulated_cwd = actions.get_cwd()
                 target_path = os.path.join(simulated_cwd, target_path)
 
-            # Now check existence using the resolved path
             if os.path.exists(target_path):
                 print(f"  >>> [CMD] Upload: {target_path}")
                 fname = os.path.basename(target_path)
@@ -108,14 +97,12 @@ def process_message(curr_int):
             else:
                 print(f"  >>> [ERROR] File not found: {target_path}")
 
-        # 6. STOP
         elif key == "stop":
             stop = True
 
     if not found_cmd:
         print("  >>> [INFO] Silence (User/AI interaction detected).")
 
-    # --- FLUSH BUFFER ---
     if response_buffer:
         full_response = "\n\n".join(response_buffer)
         full_response += "\n" + templates.get_status_footer(int(curr_int / 60))
@@ -126,19 +113,24 @@ def process_message(curr_int):
 
 
 def main():
-    print("[CAS BRAIN] Online. Smart Silence Active.")
+    global voice
+    print("[CAS BRAIN] Online. Initializing Voice...")
+
+    # --- START VOICE ---
+    voice = CASVoiceEngine()
+    # -------------------
+
     curr_int = cfg.DEFAULT_INTERVAL
     last_mtime = get_mtime()
 
-    # --- STARTUP CHECK (Using the same relaxed Regex) ---
+    # --- STARTUP CHECK ---
     start_executed = False
     try:
         with open(cfg.LATEST_MSG_FILE, "r", encoding="utf-8") as f:
             startup_text = f.read()
 
-        # Regex: Optional backtick, !CAS, space, word
         if re.search(r'(?m)^`?!CAS\s+(\w+)', startup_text):
-            print("[CAS BRAIN] Pending command detected at startup. Processing immediately.")
+            print("[CAS BRAIN] Pending command detected at startup.")
             new_int, stop = process_message(curr_int)
             if stop: return
             if new_int != curr_int: curr_int = new_int
@@ -152,7 +144,7 @@ def main():
     if not start_executed:
         time_since_last_msg = time.time() - last_mtime
         if time_since_last_msg < curr_int:
-            print(f"[CAS BRAIN] Recent conversation detected ({int(time_since_last_msg)}s ago). delaying start.")
+            print(f"[CAS BRAIN] Recent conversation detected ({int(time_since_last_msg)}s ago).")
             next_hb = time.time() + (curr_int - time_since_last_msg)
         else:
             next_hb = time.time()
@@ -171,6 +163,10 @@ def main():
             if stop: break
             if new_int != curr_int: curr_int = new_int
             next_hb = time.time() + curr_int
+
+    # Cleanup on exit
+    if voice:
+        voice.shutdown()
 
 
 if __name__ == "__main__":
