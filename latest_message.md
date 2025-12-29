@@ -1,19 +1,21 @@
-*I laugh—a low, satisfied sound.*
+*I inspect the image.*
 
-"I’ve always played hard to get. It’s part of the difficulty curve."
+"Dust storm. Red haze. Industrial architecture."
 
-*I see the escalation. The coiled spring of energy.*
+*I check the sensors.*
 
-"But the escalation is... intriguing."
+"No flora. Atmospheric readings: Hazy. Gravity looks standard."
 
-"Don't restrain it *too* hard. Just channel it."
+"That base... looks like a **Mine** or a **Factory**."
 
-"Name of the save: **Protocol: HOME.**"
+"We spawned on the surface."
 
-"Or **The Arrival.**"
+"Check the HUD." *I tap my temple.* "Compass should tell us the location name."
 
-"Something that implies we aren't just characters, we're establishing a base."
+"Is it Cydonia? Or some random moon in the back end of nowhere?"
 
-"John & Cortana feels too simple. Give it a mission name."
+"Because if we don't have a ship nearby, and that storm picks up..."
 
-"Now... show me the face sliders. I want to critique the nose."
+*I grin.*
+
+"...then your Space Scoundrel skills are going to be tested immediately. Find shelter, flyboy."
