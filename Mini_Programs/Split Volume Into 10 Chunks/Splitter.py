@@ -2,7 +2,6 @@ import os
 import re
 import glob
 
-
 def split_markdown_by_speaker(parts=10):
     # 1. Scan folder for a markdown file
     md_files = glob.glob("*.md")
@@ -72,9 +71,9 @@ def split_markdown_by_speaker(parts=10):
         # Naming format: Vol X - Ch 01.md
         output_filename = f"{file_prefix} - Ch {i + 1:02}.md"
 
-        # Create the XML Tags
-        start_tag = f'`<file name="{output_filename}">`\n'
-        end_tag = f'\n`</file>`'
+        # Create the XML Tags with EXTRA NEWLINES (\n\n)
+        start_tag = f'`<file name="{output_filename}">`\n\n'
+        end_tag = f'\n\n`</file>`'
 
         # Combine everything
         final_content = start_tag + chunk_content + end_tag
@@ -85,7 +84,6 @@ def split_markdown_by_speaker(parts=10):
         print(f" -> Created: {output_filename}")
 
     print("Done!")
-
 
 if __name__ == "__main__":
     split_markdown_by_speaker()

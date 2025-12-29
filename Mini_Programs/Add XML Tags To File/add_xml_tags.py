@@ -20,14 +20,14 @@ def add_xml_tags_to_markdown():
                 content = f.read()
 
             # 3. Safety Check: Check if it already starts with a backtick and tag
-            # We look for `<file name="
             if content.lstrip().startswith('`<file name="'):
                 print(f"Skipping: {filename} (Already tagged)")
                 continue
 
-            # 4. Create the tags enclosed in backticks
-            start_tag = f'`<file name="{filename}">`\n'
-            end_tag = f'\n`</file>`'
+            # 4. Create the tags with EXTRA NEWLINES (\n\n)
+            # This creates a blank line between the tag and the content
+            start_tag = f'`<file name="{filename}">`\n\n'
+            end_tag = f'\n\n`</file>`'
 
             # 5. Combine them
             new_content = start_tag + content + end_tag
