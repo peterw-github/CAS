@@ -1,10 +1,11 @@
 import mss, io, win32clipboard
 from PIL import Image
+import cas_config as cfg
 
 def take_screenshot_to_clipboard():
     try:
         with mss.mss() as sct:
-            monitor = sct.monitors[0] # 0 = All Monitors
+            monitor = sct.monitors[cfg.MONITORS] # 0 = All Monitors
             print(f"[VISION] Capturing: {monitor}")
             sct_img = sct.grab(monitor)
             img = Image.frombytes("RGB", sct_img.size, sct_img.bgra, "raw", "BGRX")

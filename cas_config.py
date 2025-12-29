@@ -12,7 +12,7 @@ BRIDGE_LOOP_DELAY = 1
 CLIPBOARD_TIMEOUT = 5
 
 # --- VOICE SETTINGS ---
-VIBEVOICE_URL = "https://ad400994ef409f13d3.gradio.live" # Update if expired
+VIBEVOICE_URL = "https://e1ddab2175fc1f4b6b.gradio.live" # Update if expired
 VOICE_SPEAKER = "Just Keep Your Head Down, - Halo 3"
 VOICE_CFG_SCALE = 1.0
 DISABLE_CLONE = False
@@ -20,3 +20,6 @@ DISABLE_CLONE = False
 # --- OUTPUT DIRS ---
 OUTPUT_AUDIO_DIR = "AudioFiles"
 OUTPUT_TEXT_DIR = "TextFiles"  # <--- NEW
+
+# --- VISION ---
+MONITORS = 1 # 0 for all monitors. 1, 2, and 3, respectively represent the monitors 'identified' by Windows, in display settings.
