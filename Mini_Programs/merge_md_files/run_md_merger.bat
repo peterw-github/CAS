@@ -4,7 +4,7 @@ echo Searching for files to merge...
 echo.
 
 :: Runs the python script
-python merge_md.py
+python md_merger.py
 
 echo.
 echo ========================================================
