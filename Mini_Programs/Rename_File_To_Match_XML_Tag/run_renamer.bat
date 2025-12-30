@@ -16,7 +16,7 @@ if %errorlevel% neq 0 (
 )
 
 :: Run the Python script
-python bulk_rename.py
+python renamer.py
 
 echo.
 echo ==================================================
