@@ -23,3 +23,7 @@ OUTPUT_TEXT_DIR = "TextFiles"  # <--- NEW
 
 # --- VISION ---
 MONITORS = 1 # 0 for all monitors. 1, 2, and 3, respectively represent the monitors 'identified' by Windows, in display settings.
+
+# --- NAVIGATION ---
+# NEW: The "Home Base" for the AI. Use raw string r"" for Windows paths.
+AI_START_DIR = r"D:\GoogleDrive\Core"

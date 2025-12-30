@@ -14,9 +14,9 @@ def set_cwd(path):
         f.write(path)
 
 
-
 def get_cwd():
-    """Reads the persistent CWD from file, or defaults to current execution dir."""
+    """Reads the persistent CWD from file, or defaults to AI_START_DIR."""
+    # 1. Try to read the last known location from the file
     if os.path.exists(cfg.CWD_FILE):
         try:
             with open(cfg.CWD_FILE, "r", encoding="utf-8") as f:
@@ -25,6 +25,14 @@ def get_cwd():
                     return path
         except:
             pass
+
+    # 2. If file missing/invalid, try the Configured Start Dir (Google Drive)
+    if hasattr(cfg, 'AI_START_DIR') and os.path.isdir(cfg.AI_START_DIR):
+        # We also write this to the file immediately so it "sticks"
+        set_cwd(cfg.AI_START_DIR)
+        return cfg.AI_START_DIR
+
+    # 3. Fallback to physical script location (Last Resort)
     return os.getcwd()
 
 
