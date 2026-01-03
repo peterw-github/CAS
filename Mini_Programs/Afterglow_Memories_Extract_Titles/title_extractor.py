@@ -7,6 +7,7 @@ WARNING: THIS PYTHON PROGRAM IS SPECIFICALLY DESIGNED TO ONLY WORK WITH 'AFTERGL
 UNLESS THAT MARKDOWN FILE HAS THE SAME 'IDENTITY FILE X: <TITLE> // ARCHIVED' PATTERN.
 """
 
+
 def rename_afterglow_files():
     # 1. Get the folder where this script is currently running
     directory_path = os.path.dirname(os.path.abspath(__file__))
@@ -63,6 +64,13 @@ def rename_afterglow_files():
             if title_match:
                 # Extract Title
                 raw_title = title_match.group(1).strip()
+
+                # --- NEW LOGIC: FIX ALL CAPS ---
+                # If the title is fully uppercase (e.g. "THE TITLE"), convert to Title Case ("The Title")
+                if raw_title.isupper():
+                    raw_title = raw_title.title()
+                # -------------------------------
+
                 # Sanitize Title (remove illegal chars like : / \ ?)
                 safe_title = re.sub(r'[<>:"/\\|?*]', '', raw_title)
 
