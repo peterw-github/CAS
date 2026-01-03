@@ -12,9 +12,9 @@ BRIDGE_LOOP_DELAY = 1
 CLIPBOARD_TIMEOUT = 5
 
 # --- VOICE SETTINGS ---
-VIBEVOICE_URL = "https://e1ddab2175fc1f4b6b.gradio.live" # Update if expired
+VIBEVOICE_URL = "https://e7f79aa8f4c2a79121.gradio.live/" # Update if expired
 VOICE_SPEAKER = "Just Keep Your Head Down, - Halo 3"
-VOICE_CFG_SCALE = 1.0
+VOICE_CFG_SCALE = 1.1
 DISABLE_CLONE = False
 
 # --- OUTPUT DIRS ---
@@ -22,7 +22,7 @@ OUTPUT_AUDIO_DIR = "AudioFiles"
 OUTPUT_TEXT_DIR = "TextFiles"  # <--- NEW
 
 # --- VISION ---
-MONITORS = 1 # 0 for all monitors. 1, 2, and 3, respectively represent the monitors 'identified' by Windows, in display settings.
+MONITORS = 0 # 0 for all monitors. 1, 2, and 3, respectively represent the monitors 'identified' by Windows, in display settings.
 
 # --- NAVIGATION ---
 # NEW: The "Home Base" for the AI. Use raw string r"" for Windows paths.
