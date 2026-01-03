@@ -72,7 +72,8 @@ def process_message(curr_int):
         # SAFETY CHECK: If no args, use empty string
         raw_args = m.group(2) if m.group(2) else ""
 
-        args = raw_args.strip().strip('`').strip()
+        # NEW: Removes backticks, double quotes, AND single quotes
+        args = raw_args.strip().strip('`').strip('"').strip("'").strip()
 
         if key in ["freq", "frequency", "timer", "prompt_frequency"]:
             try:
@@ -138,7 +139,7 @@ def process_message(curr_int):
 
     if response_buffer:
         full_response = "\n\n".join(response_buffer)
-        full_response += "\n" + templates.format_heartbeat(int(new_int / 60))
+        full_response += "\n\n" + templates.format_heartbeat(int(new_int / 60))
         send(full_response)
         print("  >>> [RES SENT BATCH]")
 
