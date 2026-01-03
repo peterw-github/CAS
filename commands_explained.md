@@ -1,3 +1,7 @@
+**[CAS HELP]**
+
+`<file name="commands_explained.md">`
+
 # CAS System Manual (AI Interface)
 
 ## Overview
@@ -47,3 +51,5 @@ Multiple commands in a single response are supported, so long as each one is on 
 
 **Syntax:** `!CAS stop`
 **Description:** Terminates the CAS Brain loop.
+
+`</file>`

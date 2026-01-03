@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import StaleElementReferenceException
 
 
 def connect_chrome():
@@ -81,8 +82,13 @@ def check_for_new_message(driver):
                 print(f"[BRIDGE] New message captured ({len(content)} chars).")
                 return
             time.sleep(0.1)
+
+    except StaleElementReferenceException:
+        # The DOM updated while we were looking at it.
+        # Ignore this and try again in the next loop.
+        return
     except Exception as e:
-            print(f"[BRIDGE READ ERROR] {e}")  # <--- Change 'pass' to this
+        print(f"[BRIDGE READ ERROR] {e}")
 
 
 def main():

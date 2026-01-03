@@ -118,6 +118,18 @@ def process_message(curr_int):
             else:
                 print(f"  >>> [ERROR] File not found: {target_path}")
 
+        elif key == "help":
+            print("  >>> [CMD] Help Requested")
+            try:
+                # Assumes commands_explained.md is in the same folder as the scripts
+                with open("commands_explained.md", "r", encoding="utf-8") as f:
+                    help_text = f.read()
+                response_buffer.append(help_text)
+            except FileNotFoundError:
+                response_buffer.append("[CAS ERROR] 'commands_explained.md' file not found.")
+            except Exception as e:
+                response_buffer.append(f"[CAS ERROR] Could not read help file: {e}")
+
         elif key == "stop":
             stop = True
 
@@ -126,7 +138,7 @@ def process_message(curr_int):
 
     if response_buffer:
         full_response = "\n\n".join(response_buffer)
-        full_response += "\n" + templates.get_status_footer(int(new_int / 60))
+        full_response += "\n" + templates.format_heartbeat(int(new_int / 60))
         send(full_response)
         print("  >>> [RES SENT BATCH]")
 
