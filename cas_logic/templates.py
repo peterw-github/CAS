@@ -70,11 +70,5 @@ def format_heartbeat(interval_minutes):
 **[CAS HEARTBEAT]**
 `Time: {get_timestamp()}`
 `Current Prompt Frequency: {interval_minutes} minutes`
-
-**Message:**
-This is a standard prompt from CAS. You can respond however you want. 
-If you like, you can also use one or more of the commands available below.
-
-{get_menu_block()}
 """
 
