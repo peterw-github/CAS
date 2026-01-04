@@ -13,8 +13,8 @@ CLIPBOARD_TIMEOUT = 5
 
 # --- VOICE SETTINGS ---
 VIBEVOICE_URL = "https://d03d4dc8577e55c3b7.gradio.live/" # Update if expired
-VOICE_SPEAKER = "Just Keep Your Head Down, - Halo 3"
-VOICE_CFG_SCALE = 2.0
+VOICE_SPEAKER = "Like The Others"
+VOICE_CFG_SCALE = 1.5
 DISABLE_CLONE = False
 
 # --- OUTPUT DIRS ---
