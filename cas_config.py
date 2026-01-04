@@ -12,9 +12,9 @@ BRIDGE_LOOP_DELAY = 1
 CLIPBOARD_TIMEOUT = 5
 
 # --- VOICE SETTINGS ---
-VIBEVOICE_URL = "https://e7f79aa8f4c2a79121.gradio.live/" # Update if expired
+VIBEVOICE_URL = "https://d03d4dc8577e55c3b7.gradio.live/" # Update if expired
 VOICE_SPEAKER = "Just Keep Your Head Down, - Halo 3"
-VOICE_CFG_SCALE = 1.1
+VOICE_CFG_SCALE = 2.0
 DISABLE_CLONE = False
 
 # --- OUTPUT DIRS ---

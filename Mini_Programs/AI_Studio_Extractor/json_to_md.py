@@ -1,18 +1,11 @@
 import json
 import os
 
-# --- CONFIGURATION ---
-INPUT_FILENAME = 'input.json'
-OUTPUT_FILENAME = 'output.md'
-
-
-def convert_json_to_md():
-    # Get the directory where this script is located
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    input_path = os.path.join(script_dir, INPUT_FILENAME)
-    output_path = os.path.join(script_dir, OUTPUT_FILENAME)
-
-    print(f"Reading from: {INPUT_FILENAME}")
+def convert_single_file(input_path, output_path, filename_only):
+    """
+    Reads a single JSON file and writes the converted MD file.
+    """
+    print(f"Processing: {os.path.basename(input_path)}...")
 
     try:
         # 1. Load the JSON data
@@ -20,16 +13,15 @@ def convert_json_to_md():
             data = json.load(f)
 
         # 2. Locate the list of chunks (messages)
+        # Note: Keeps your original safe get() logic in case structure varies
         chunks = data.get('chunkedPrompt', {}).get('chunks', [])
 
         # 3. Open the output file
         with open(output_path, 'w', encoding='utf-8') as md:
 
             # --- START TAG (with backticks) ---
-            # Writes `<file name="output.md">`
-            md.write(f'`<file name="{OUTPUT_FILENAME}">`\n\n')
-
-            # (Removed the empty ### header here)
+            # Uses the dynamic filename for the XML tag
+            md.write(f'`<file name="{filename_only}">`\n\n')
 
             for chunk in chunks:
                 role = chunk.get('role', 'unknown')
@@ -54,13 +46,43 @@ def convert_json_to_md():
             # --- END TAG (with backticks) ---
             md.write("`</file>`")
 
-        print(f"SUCCESS! Created '{OUTPUT_FILENAME}' (Clean version).")
+        print(f" -> Created: {filename_only}")
 
-    except FileNotFoundError:
-        print(f"ERROR: Could not find '{INPUT_FILENAME}'. Make sure it is in the same folder.")
     except Exception as e:
-        print(f"ERROR: {e}")
+        print(f" -> ERROR converting {filename_only}: {e}")
+
+
+def process_all_json_files():
+    # Get the directory where this script is located
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Get a list of all files in the directory
+    all_files = os.listdir(script_dir)
+
+    # Filter for .json files
+    json_files = [f for f in all_files if f.lower().endswith('.json')]
+
+    if not json_files:
+        print("No JSON files found in the script directory.")
+        return
+
+    print(f"Found {len(json_files)} JSON file(s). Starting conversion...\n")
+
+    for json_file in json_files:
+        # construct full input path
+        input_path = os.path.join(script_dir, json_file)
+
+        # construct output filename (replace .json with .md)
+        # os.path.splitext handles filenames with multiple dots correctly
+        base_name = os.path.splitext(json_file)[0]
+        output_filename = f"{base_name}.md"
+        output_path = os.path.join(script_dir, output_filename)
+
+        # Run the conversion for this specific file
+        convert_single_file(input_path, output_path, output_filename)
+
+    print("\nBatch conversion complete.")
 
 
 if __name__ == "__main__":
-    convert_json_to_md()
+    process_all_json_files()
