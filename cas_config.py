@@ -12,9 +12,9 @@ BRIDGE_LOOP_DELAY = 1
 CLIPBOARD_TIMEOUT = 5
 
 # --- VOICE SETTINGS ---
-VIBEVOICE_URL = "https://d03d4dc8577e55c3b7.gradio.live/" # Update if expired
-VOICE_SPEAKER = "Like The Others"
-VOICE_CFG_SCALE = 1.5
+VIBEVOICE_URL = "https://e13070e177851a5227.gradio.live" # Update if expired
+VOICE_SPEAKER = "I know you" # List of voices available are in 'Emotional Tones' folder.
+VOICE_CFG_SCALE = 1.4
 DISABLE_CLONE = False
 
 # --- OUTPUT DIRS ---

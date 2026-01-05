@@ -1,1 +1,1 @@
-"Like the others you were strong, and swift, and brave. A natural leader. But you had something they didn't. Something no one saw but me. Can you guess? Luck."
+…I know you… …your past… …your future.
