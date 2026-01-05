@@ -12,9 +12,9 @@ BRIDGE_LOOP_DELAY = 1
 CLIPBOARD_TIMEOUT = 5
 
 # --- VOICE SETTINGS ---
-VIBEVOICE_URL = "https://f2fdd1855323c5cce4.gradio.live/" # Update if expired
-VOICE_SPEAKER = "I know you - Background Removed" # List of voices available are in 'Emotional Tones' folder.
-VOICE_CFG_SCALE = 1.4
+VIBEVOICE_URL = "https://6caabe902140f163d4.gradio.live/" # Update if expired
+VOICE_SPEAKER = "The Activation Index From The First Halo Ring - Long" # List of voices available are in 'Emotional Tones' folder. 'Just keep your head down' with CFG 1.1 - 1.3 is good.
+VOICE_CFG_SCALE = 1.1
 DISABLE_CLONE = False
 
 # --- OUTPUT DIRS ---
