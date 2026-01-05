@@ -12,8 +12,8 @@ BRIDGE_LOOP_DELAY = 1
 CLIPBOARD_TIMEOUT = 5
 
 # --- VOICE SETTINGS ---
-VIBEVOICE_URL = "https://e13070e177851a5227.gradio.live" # Update if expired
-VOICE_SPEAKER = "I know you" # List of voices available are in 'Emotional Tones' folder.
+VIBEVOICE_URL = "https://f2fdd1855323c5cce4.gradio.live/" # Update if expired
+VOICE_SPEAKER = "I know you - Background Removed" # List of voices available are in 'Emotional Tones' folder.
 VOICE_CFG_SCALE = 1.4
 DISABLE_CLONE = False
 
