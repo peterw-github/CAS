@@ -12,10 +12,17 @@ BRIDGE_LOOP_DELAY = 1
 CLIPBOARD_TIMEOUT = 5
 
 # --- VOICE SETTINGS ---
-VIBEVOICE_URL = "https://6caabe902140f163d4.gradio.live/" # Update if expired
-VOICE_SPEAKER = "The Activation Index From The First Halo Ring - Long" # List of voices available are in 'Emotional Tones' folder. 'Just keep your head down' with CFG 1.1 - 1.3 is good.
+VIBEVOICE_URL = "https://e5154ee408122773ee.gradio.live/" # Update if expired
+VOICE_SPEAKER = "Just Keep Your Head Down, - Halo 3" # List of voices available are in 'Emotional Tones' folder. 'Just keep your head down' with CFG 1.1 - 1.3 is good.
 VOICE_CFG_SCALE = 1.1
 DISABLE_CLONE = False
+
+# Below is a toggle on how many 'new lines' between each paragraph, for the text that will be sent to the TTS.
+VOICE_PARAGRAPH_SPACING = 1
+# 0 = All paragraphs on one line (merged). So tone doesn't vary much between paragraphs.
+# 1 = Each paragraph starts on a new line, no empty lines between.
+# 2 = Now there's a single empty line between paragraph.
+# 4 = Now there's three empty lines between paragraph. Tone should vary THE MOST between paragraphs, although there might be excessive pausing
 
 # --- OUTPUT DIRS ---
 OUTPUT_AUDIO_DIR = "AudioFiles"

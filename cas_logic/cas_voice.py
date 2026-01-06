@@ -91,16 +91,23 @@ class CASVoiceEngine:
                 print(f"[VOICE] Critical Playback Error: {e}")
 
     def _clean_text(self, text):
-        """
-        MINIMAL CLEANUP:
-        1. Identifies content between triple backticks (```) and replaces it with "[Code Block]".
-        2. Preserves EVERYTHING else.
-        """
-        # CHANGE: Replace with a single space " " instead of " [Code Block] "
+        # 1. Remove Code Blocks (replace with space)
         text = re.sub(r"```.*?```", " ", text, flags=re.DOTALL)
 
-        # Collapse excessive whitespace to single spaces (prevents awkward pauses)
-        text = re.sub(r'\s+', ' ', text)
+        # 2. Collapse all horizontal whitespace (tabs/spaces) to single space
+        #    This cleans up the "insides" of sentences first.
+        text = re.sub(r'[^\S\r\n]+', ' ', text)
+
+        # 3. Handle Paragraph Spacing
+        spacing = getattr(cfg, 'VOICE_PARAGRAPH_SPACING', 1)  # Default to 1 if missing
+
+        if spacing == 0:
+            # Option 0: Replace newlines with a single SPACE (merge paragraphs)
+            text = re.sub(r'\n+', ' ', text)
+        else:
+            # Option 1+: Replace newlines with precisely X newlines
+            replacement = "\n" * spacing
+            text = re.sub( r'\n+', replacement, text)
 
         return text.strip()
 
