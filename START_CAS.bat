@@ -1,16 +1,20 @@
 @echo off
 
-:: 1. HARDCODE THE PATH TO YOUR CODE FOLDER
-cd /d "D:\CAS" 
+:: --- CONFIGURATION ---
+:: Note: I removed the quotes from the variable definitions here
+:: so we can safely wrap them in quotes later.
+set WORK_DIR=D:\CAS
+set PYTHON_EXE=D:\CAS\.venv\Scripts\python.exe
 
-:: 2. Point to your Python (same as before)
-set PYTHON_EXE="D:/CAS/.venv/Scripts/python.exe"
+:: --- LAUNCH WINDOWS TERMINAL ---
+:: Syntax breakdown:
+:: 1. wt : Launches Windows Terminal
+:: 2. --title : Names the first tab
+:: 3. -d : Sets the directory
+:: 4. cmd /k : Runs the python script and KEEPS THE TAB OPEN (/k) if it crashes
+:: 5. ; new-tab : Tells terminal to open a second tab in the same window
 
-echo Starting CAS Bridge...
-start "CAS BRIDGE" %PYTHON_EXE% cas_bridge.py
+wt --title "CAS BRIDGE" -d "%WORK_DIR%" cmd /k "%PYTHON_EXE% cas_bridge.py" ; new-tab --title "CAS BRAIN" -d "%WORK_DIR%" cmd /k "%PYTHON_EXE% cas_brain.py"
 
-echo Starting CAS Brain...
-start "CAS BRAIN" %PYTHON_EXE% cas_brain.py
-
-echo Systems online.
-timeout /t 5
+:: --- DONE ---
+:: No pause needed, as the WT window opens separately.
