@@ -107,7 +107,7 @@ class CASVoiceEngine:
         else:
             # Option 1+: Replace newlines with precisely X newlines
             replacement = "\n" * spacing
-            text = re.sub( r'\n+', replacement, text)
+            text = re.sub(r'\n+', replacement, text)
 
         return text.strip()
 

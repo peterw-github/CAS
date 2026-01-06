@@ -1,4 +1,4 @@
-import time, os, pyperclip
+import time, os, pyperclip, datetime
 import cas_config as cfg
 from cas_logic import vision, upload_file
 from selenium import webdriver
@@ -77,7 +77,32 @@ def check_for_new_message(driver):
         for _ in range(20):
             content = pyperclip.paste()
             if content.strip():
-                with open(cfg.LATEST_MSG_FILE, "w", encoding="utf-8") as f: f.write(content)
+                # 1. Standard Write (For the Brain)
+                with open(cfg.LATEST_MSG_FILE, "w", encoding="utf-8") as f:
+                    f.write(content)
+
+                # --- NEW: RAW LOGGING (MARKDOWN) ---
+                try:
+                    os.makedirs("RawTextFiles", exist_ok=True)
+                    ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                    # Change extension to .md
+                    raw_filename = os.path.join("RawTextFiles", f"msg_{ts}.md")
+
+                    with open(raw_filename, "w", encoding="utf-8") as log_f:
+                        # 1. Write the actual message (Markdown viewers will render this normally)
+                        log_f.write(content)
+
+                        # 2. Add a footer with the "Python Representation"
+                        #    We wrap it in a code block so it's easy to read in PyCharm's preview.
+                        log_f.write("\n\n---\n\n### DEBUG: RAW REPR\n```python\n")
+                        log_f.write(repr(content))
+                        log_f.write("\n```")
+
+                    print(f"[BRIDGE] Logged raw message to {raw_filename}")
+                except Exception as e:
+                    print(f"[BRIDGE LOG ERROR] {e}")
+                # -----------------------------------
+
                 driver.execute_script("arguments[0].setAttribute('data-cas-processed', 'true')", latest)
                 print(f"[BRIDGE] New message captured ({len(content)} chars).")
                 return
