@@ -95,19 +95,37 @@ class CASVoiceEngine:
         text = re.sub(r"```.*?```", " ", text, flags=re.DOTALL)
 
         # 2. Collapse all horizontal whitespace (tabs/spaces) to single space
-        #    This cleans up the "insides" of sentences first.
         text = re.sub(r'[^\S\r\n]+', ' ', text)
 
-        # 3. Handle Paragraph Spacing
-        spacing = getattr(cfg, 'VOICE_PARAGRAPH_SPACING', 1)  # Default to 1 if missing
+        # 3. Check for the Toggle
+        use_smart_merge = getattr(cfg, 'VOICE_SMART_MERGE', False)
 
-        if spacing == 0:
-            # Option 0: Replace newlines with a single SPACE (merge paragraphs)
+        if use_smart_merge:
+            # --- MODE A: SMART MERGE (The new behavior) ---
+            # 1. Normalize line endings
+            text = text.replace('\r\n', '\n')
+
+            # 2. Handle MAJOR breaks (3 empty lines = 4 newlines)
+            #    Protect them by turning them into a placeholder
+            text = re.sub(r'\n{4,}', '<<MAJOR_BREAK>>', text)
+
+            # 3. Merge everything else (standard paragraphs) into a single line
             text = re.sub(r'\n+', ' ', text)
+
+            # 4. Restore the MAJOR breaks as a single empty line (\n\n)
+            text = text.replace('<<MAJOR_BREAK>>', '\n\n')
+
         else:
-            # Option 1+: Replace newlines with precisely X newlines
-            replacement = "\n" * spacing
-            text = re.sub(r'\n+', replacement, text)
+            # --- MODE B: LEGACY BEHAVIOR (Your original logic) ---
+            spacing = getattr(cfg, 'VOICE_PARAGRAPH_SPACING', 1)
+
+            if spacing == 0:
+                # Merge all paragraphs
+                text = re.sub(r'\n+', ' ', text)
+            else:
+                # Replace any chunk of newlines with exactly X newlines
+                replacement = "\n" * spacing
+                text = re.sub(r'\n+', replacement, text)
 
         return text.strip()
 
