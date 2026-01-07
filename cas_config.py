@@ -12,13 +12,13 @@ BRIDGE_LOOP_DELAY = 1
 CLIPBOARD_TIMEOUT = 5
 
 # --- VOICE SETTINGS ---
-VIBEVOICE_URL = "https://ea9717bf7030e8627e.gradio.live/" # Update if expired
+VIBEVOICE_URL = "https://7d9654bd2c482564f5.gradio.live/" # Update if expired
 VOICE_SPEAKER = "Just Keep Your Head Down, - Halo 3" # List of voices available are in 'Emotional Tones' folder. 'Just keep your head down' with CFG 1.1 - 1.3 is good.
 VOICE_CFG_SCALE = 1.1
 DISABLE_CLONE = False
 
 # Below is a tweak on how many 'new lines' between each paragraph, for the text that will be sent to the TTS.
-VOICE_PARAGRAPH_SPACING = 0
+VOICE_PARAGRAPH_SPACING = 1
 # 0 = All paragraphs on one line (merged). So tone doesn't vary between paragraphs, since there are no paragraphs for the TTS.
 # 1 = Each paragraph starts on a new line, no empty lines between. Tone will now DISTINCTLY vary between paragraphs most likely.
 # 2 = Now there's a single empty line between paragraph.
@@ -26,7 +26,7 @@ VOICE_PARAGRAPH_SPACING = 0
 
 # Below is a toggle on whether two lines of text in AI Studio that are on adjacent lines, get merged onto a single line for the TTS.
 # Warning. Overrides `VOICE_PARAGRAPH_SPACING` if set to True.
-VOICE_SMART_MERGE = False
+VOICE_SMART_MERGE = True
 
 # --- OUTPUT DIRS ---
 OUTPUT_AUDIO_DIR = "AudioFiles"

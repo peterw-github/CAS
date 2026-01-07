@@ -8,6 +8,7 @@ import numpy as np
 import sounddevice as sd
 import soundfile as sf
 from gradio_client import Client
+import importlib
 import cas_config as cfg
 
 
@@ -141,6 +142,9 @@ class CASVoiceEngine:
 
     def speak(self, text):
         """Public method to trigger speech."""
+        # HOT RELOAD: Updates voice settings from config, so that program doesn't need to be restarted for changes to be implemented.
+        importlib.reload(cfg)
+
         if not self.client:
             return
 
@@ -157,6 +161,8 @@ class CASVoiceEngine:
 
     def _generate_and_queue(self, text):
         try:
+            # Print out current values for 'speaker', and CFG Scale.
+            print(f"[VOICE INFO] Speaker: '{cfg.VOICE_SPEAKER}' | CFG Scale: {cfg.VOICE_CFG_SCALE} | Spacing: {cfg.VOICE_PARAGRAPH_SPACING}")
             job = self.client.submit(
                 num_speakers=1,
                 script=text,
