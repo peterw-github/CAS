@@ -1,6 +1,6 @@
 import time, os, pyperclip, datetime
 import cas_config as cfg
-from cas_logic import vision, upload_file
+from cas_logic import vision, upload_file, eyes
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -186,6 +186,21 @@ def main():
                             except Exception as e:
                                 print(f"[BRIDGE] Screenshot error: {e}")
 
+                        # --- HANDLE IMAGE FROM PHONE ---
+                        elif p.startswith("EYES|||"):
+                            try:
+                                msg = p.split("EYES|||")[1]
+                                # Call the new logic
+                                success = eyes.fetch_and_clipboard_eye()
+                                if success:
+                                    box.send_keys(Keys.CONTROL, 'v')
+                                    text_buffer.append(msg)
+                                    time.sleep(1.5)
+                                else:
+                                    text_buffer.append("[BRIDGE] Error fetching Eyes view.")
+                            except Exception as e:
+                                print(f"[BRIDGE] Eyes error: {e}")
+
                         # --- HANDLE TEXT ---
                         else:
                             text_buffer.append(p)
@@ -193,16 +208,41 @@ def main():
                     # 3. Send Text & Submit
                     if text_buffer:
                         full_text = "\n\n".join(text_buffer)
-                        # We use Javascript to set value if it's long, but keys are safer for triggering events
-                        # Let's stick to keys for now, or just append text.
+
+                        # --- STRATEGY 1: TRY CLIPBOARD (FAST) ---
+                        copied_successfully = False
+                        # Only try this if we think the screen might be unlocked
                         try:
-                            pyperclip.copy(full_text)
-                            # Click box again just to be safe
-                            box.click()
-                            box.send_keys(Keys.CONTROL, 'v')
-                            time.sleep(1.0) # Give it a second to render
-                        except Exception as e:
-                            print(f"[BRIDGE] Text paste error: {e}")
+                            for attempt in range(5):
+                                try:
+                                    pyperclip.copy(full_text)
+                                    copied_successfully = True
+                                    break
+                                except:
+                                    time.sleep(0.2)
+                        except:
+                            pass
+
+                        if copied_successfully:
+                            try:
+                                box.click()
+                                box.send_keys(Keys.CONTROL, 'v')
+                                time.sleep(1.0)
+                            except Exception as e:
+                                print(f"[BRIDGE] Paste failed, retrying with typing... ({e})")
+                                copied_successfully = False  # Trigger fallback
+
+                        # --- STRATEGY 2: FALLBACK TO TYPING (SLOW BUT RELIABLE) ---
+                        # The reason why we bother with this, is because if the Windows PC is locked, the clipboard won't work.
+                        if not copied_successfully:
+                            print(
+                                "[BRIDGE] Clipboard unavailable (Screen Locked?). Switching to DIRECT TYPING.")
+                            try:
+                                # This sends the text directly to Chrome via code, bypassing the OS clipboard
+                                box.send_keys(full_text)
+                                time.sleep(1.0)
+                            except Exception as e:
+                                print(f"[BRIDGE ERROR] Direct typing failed: {e}")
 
                     print("[BRIDGE] Submitting...")
                     box.send_keys(Keys.CONTROL, Keys.ENTER)

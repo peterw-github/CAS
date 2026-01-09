@@ -105,6 +105,12 @@ def process_message(curr_int):
             payload = templates.format_screenshot_payload(int(curr_int / 60))
             response_buffer.append(f"SCREENSHOT|||{payload}")
 
+        elif key == "eyes":
+            print("  >>> [CMD] Eyes Request")
+            payload = f"Phone Camera View (Captured at {int(curr_int / 60)}m interval)."
+            # New Tag: EYES
+            response_buffer.append(f"EYES|||{payload}")
+
         elif key in ["upload", "upload_file"]:
             target_path = args
             if not os.path.isabs(target_path):
