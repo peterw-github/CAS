@@ -1,6 +1,6 @@
 import time, os, pyperclip, datetime
 import cas_config as cfg
-from cas_logic import vision, upload_file, eyes
+from cas_logic import screen_snapshot, upload_file, what_john_sees_snapshot
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By

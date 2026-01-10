@@ -1,7 +1,8 @@
 import time, re, os
 import cas_config as cfg
-from cas_logic import actions, templates, screen_recording # <--- Add screen_recording here
+from cas_logic import actions, templates, screen_record, what_john_sees_record
 from cas_logic.cas_voice import CASVoiceEngine
+
 
 # --- GLOBAL VOICE INSTANCE ---
 voice = None
@@ -105,12 +106,6 @@ def process_message(curr_int):
             payload = templates.format_screenshot_payload(int(curr_int / 60))
             response_buffer.append(f"SCREENSHOT|||{payload}")
 
-        elif key == "eyes":
-            print("  >>> [CMD] Eyes Request")
-            payload = f"Phone Camera View (Captured at {int(curr_int / 60)}m interval)."
-            # New Tag: EYES
-            response_buffer.append(f"EYES|||{payload}")
-
         elif key == "screen_record":
             print(f"  >>> [CMD] Screen Record Triggered ({cfg.SCREEN_RECORDING_DURATION}s)")
 
@@ -118,7 +113,7 @@ def process_message(curr_int):
             duration = cfg.SCREEN_RECORDING_DURATION
 
             # 2. Trigger the Recording
-            success = screen_recording.record_screen(duration)
+            success = screen_record.record_screen(duration)
 
             # 3. Handle Result
             if success:
@@ -126,6 +121,29 @@ def process_message(curr_int):
                 response_buffer.append(f"UPLOAD|||SCREEN_RECORD|||{payload}")
             else:
                 response_buffer.append("**[CAS ERROR]** Recording failed. Is OBS open?")
+
+
+        elif key == "see":
+            # Command to take a picture on the phone.
+            print("  >>> [CMD] Eyes Request")
+            payload = f"Phone Camera View (Captured at {int(curr_int / 60)}m interval)."
+            # New Tag: EYES
+            response_buffer.append(f"EYES|||{payload}")
+
+
+        elif key in ["watch", "see_video", "record_eyes"]:
+            # Command to trigger phone video recording
+            print("  >>> [CMD] Phone Vision Recording Triggered")
+
+            # Run the logic (10 seconds default)
+            success = what_john_sees_record.record_phone_screen(duration_seconds=10)
+
+            if success:
+                # Use SCREEN_RECORD tag because file is already on clipboard
+                payload = "**[CAS VISION]**\nI am watching your feed. (Phone Video Captured)"
+                response_buffer.append(f"UPLOAD|||SCREEN_RECORD|||{payload}")
+            else:
+                response_buffer.append("**[CAS ERROR]** Could not retrieve vision feed from phone.")
 
         elif key in ["upload", "upload_file"]:
             target_path = args

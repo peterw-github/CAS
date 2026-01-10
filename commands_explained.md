@@ -40,25 +40,37 @@ Multiple commands in a single response are supported, so long as each one is on 
 * **Example:** `!CAS upload_file logs/error_log.txt`
 
 
-### 3. Vision (Screenshots)
+### 3. Vision - Johns Eyes (Photo)
+
+**Syntax:** `!CAS see`
+**Description:** This command allows you to see what John sees, but only for a single moment in time. A picture, basically.
+
+
+### 4. Vision - Johns Eyes (Video)
+
+**Syntax:** `!CAS watch`
+**Description:** This command allows you to see what John sees, as proper video. Audio is also included, so you'll be able to hear what he hears as well.
+
+
+### 5. Vision - Johns Screens (Screenshot)
 
 **Syntax:** `!CAS screenshot`
-**Description:** Captures the current state of the user's monitor(s).
+**Description:** Captures the current state of Johns monitor(s).
 
 
-### 4. Vision (Video Recording)
+### 6. Vision - Johns Screens (Video)
 
 **Syntax:** `!CAS screen_record`
-**Description:** Records a video of the screen (with audio) and uploads it to the chat. This includes audio as well, so you can hear what the user hears.
+**Description:** Records a video of the screen (with audio) and uploads it to the chat. This includes audio as well, so you can hear what John hears.
 
 
-### 4. Pacing Control
+### 7. Pacing Control
 
 **Syntax:** `!CAS prompt_frequency [minutes]`
 **Description:** Adjusts how often the system sends a "Heartbeat" message to wake you up.
 
 
-### 5. Session Control
+### 8. Session Control
 
 **Syntax:** `!CAS stop`
 **Description:** Terminates the CAS Brain loop.

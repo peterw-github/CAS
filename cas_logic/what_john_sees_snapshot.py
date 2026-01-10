@@ -1,4 +1,4 @@
-# In cas_logic/eyes.py
+# In cas_logic/what_john_sees_snapshot.py
 
 import requests
 from PIL import Image
