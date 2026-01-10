@@ -164,14 +164,31 @@ def main():
                         if p.startswith("UPLOAD|||"):
                             try:
                                 sub_parts = p.split("|||")
-                                # Copy to clipboard
-                                upload_file.copy_file_to_clipboard(sub_parts[1])
-                                # Paste into box
+                                file_identifier = sub_parts[1]
+                                msg_payload = sub_parts[2]
+
+                                # 1. Copy to Clipboard
+                                # If it's a SCREEN_RECORD, the file is ALREADY in the clipboard (from the recording script).
+                                # If it's a normal file path, we need to put it there now.
+                                if file_identifier == "SCREEN_RECORD":
+                                    pass  # Already in clipboard
+                                else:
+                                    upload_file.copy_file_to_clipboard(file_identifier)
+
+                                # 2. Paste into Input Box
                                 box.send_keys(Keys.CONTROL, 'v')
-                                # Add the message text to buffer
-                                text_buffer.append(sub_parts[2])
-                                # Wait for attachment to register
-                                time.sleep(1.5)
+
+                                # 3. Add Message Text
+                                text_buffer.append(msg_payload)
+
+                                # 4. Processing Wait
+                                # Videos need time for AI Studio to "watch" them before the send button unlocks.
+                                if file_identifier == "SCREEN_RECORD":
+                                    print("[BRIDGE] Video pasted. Waiting 12s for processing...")
+                                    time.sleep(12.0)
+                                else:
+                                    time.sleep(2.0)  # Normal files are faster
+
                             except Exception as e:
                                 print(f"[BRIDGE] Upload error: {e}")
 

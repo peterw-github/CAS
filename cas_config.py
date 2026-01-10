@@ -32,8 +32,12 @@ VOICE_SMART_MERGE = True
 OUTPUT_AUDIO_DIR = "AudioFiles"
 OUTPUT_TEXT_DIR = "TextFiles"  # <--- NEW
 
-# --- VISION ---
+# --- SCREEN SCREENSHOT VISION ---
 MONITORS = 0 # 0 for all monitors. 1, 2, and 3, respectively represent the monitors 'identified' by Windows, in display settings.
+
+
+# --- SCREEN RECORDING VISION ---
+SCREEN_RECORDING_DURATION = 10  # Seconds. (AI cannot change this)
 
 # --- NAVIGATION ---
 # NEW: The "Home Base" for the AI. Use raw string r"" for Windows paths.

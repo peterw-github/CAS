@@ -1,6 +1,6 @@
 import time, re, os
 import cas_config as cfg
-from cas_logic import actions, templates
+from cas_logic import actions, templates, screen_recording # <--- Add screen_recording here
 from cas_logic.cas_voice import CASVoiceEngine
 
 # --- GLOBAL VOICE INSTANCE ---
@@ -110,6 +110,22 @@ def process_message(curr_int):
             payload = f"Phone Camera View (Captured at {int(curr_int / 60)}m interval)."
             # New Tag: EYES
             response_buffer.append(f"EYES|||{payload}")
+
+        elif key == "screen_record":
+            print(f"  >>> [CMD] Screen Record Triggered ({cfg.SCREEN_RECORDING_DURATION}s)")
+
+            # 1. Use Hardcoded Duration from Config
+            duration = cfg.SCREEN_RECORDING_DURATION
+
+            # 2. Trigger the Recording
+            success = screen_recording.record_screen(duration)
+
+            # 3. Handle Result
+            if success:
+                payload = f"**[CAS RECORDING]**\nA screen recording ({duration}s) has been attached."
+                response_buffer.append(f"UPLOAD|||SCREEN_RECORD|||{payload}")
+            else:
+                response_buffer.append("**[CAS ERROR]** Recording failed. Is OBS open?")
 
         elif key in ["upload", "upload_file"]:
             target_path = args

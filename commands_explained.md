@@ -19,6 +19,7 @@ Multiple commands in a single response are supported, so long as each one is on 
 
 ## Core Commands
 
+
 ### 1. System Execution
 
 **Syntax:** `!CAS exec [command_string]`
@@ -27,6 +28,7 @@ Multiple commands in a single response are supported, so long as each one is on 
 * **Multi-Command Support:** You can chain multiple commands in a single line using standard Windows shell operators (e.g., `&&` to run the next command only if the previous succeeds, or `&` to run sequentially).
 * **Persistence:** The system maintains a "Current Working Directory" (CWD). If you `cd` into a folder, subsequent commands will run from that folder.
 * **Output:** The standard output (stdout) and error (stderr) will be returned to you in the next message.
+
 
 ### 2. File Retrieval
 
@@ -37,15 +39,24 @@ Multiple commands in a single response are supported, so long as each one is on 
 * **Delivery:** The system will physically copy the file to the clipboard and paste it into the chat.
 * **Example:** `!CAS upload_file logs/error_log.txt`
 
+
 ### 3. Vision (Screenshots)
 
 **Syntax:** `!CAS screenshot`
 **Description:** Captures the current state of the user's monitor(s).
 
+
+### 4. Vision (Video Recording)
+
+**Syntax:** `!CAS screen_record`
+**Description:** Records a video of the screen (with audio) and uploads it to the chat. This includes audio as well, so you can hear what the user hears.
+
+
 ### 4. Pacing Control
 
 **Syntax:** `!CAS prompt_frequency [minutes]`
 **Description:** Adjusts how often the system sends a "Heartbeat" message to wake you up.
+
 
 ### 5. Session Control
 
