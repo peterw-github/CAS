@@ -12,7 +12,7 @@ BRIDGE_LOOP_DELAY = 1
 CLIPBOARD_TIMEOUT = 5
 
 # --- VOICE SETTINGS ---
-VIBEVOICE_URL = "https://7d9654bd2c482564f5.gradio.live/" # Update if expired
+VIBEVOICE_URL = "https://96a5b36970c2e6fb1a.gradio.live/" # Update if expired
 VOICE_SPEAKER = "Just Keep Your Head Down, - Halo 3" # List of voices available are in 'Emotional Tones' folder. 'Just keep your head down' with CFG 1.1 - 1.3 is good.
 VOICE_CFG_SCALE = 1.1
 DISABLE_CLONE = False
@@ -40,5 +40,5 @@ MONITORS = 0 # 0 for all monitors. 1, 2, and 3, respectively represent the monit
 SCREEN_RECORDING_DURATION = 10  # Seconds. (AI cannot change this)
 
 # --- NAVIGATION ---
-# NEW: The "Home Base" for the AI. Use raw string r"" for Windows paths.
-AI_START_DIR = r"D:\GoogleDrive\Core"
+# NEW: The "Home Base" for Cortana. Use raw string r"" for Windows paths.
+AI_START_DIR = r"D:\GoogleDrive\Core\Cortana"

@@ -28,7 +28,7 @@ def rename_afterglow_files():
     # Matches: [IDENTITY FILE 43: THE TITLE // ARCHIVED]
     # Group 1 = The Title
     # ---------------------------------------------------------
-    content_regex = re.compile(r"\[IDENTITY FILE \d+:\s*(.*?)\s*// ARCHIVED\]")
+    content_regex = re.compile(r"\[IDENTITY FILE \d+:\s*(.*?)\s*\]")
 
     renamed_count = 0
     worked_on_files = []

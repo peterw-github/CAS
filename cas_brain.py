@@ -1,8 +1,7 @@
 import time, re, os
 import cas_config as cfg
-from cas_logic import actions, templates, screen_record, what_john_sees_record
+from cas_logic import actions, templates, screen_record, what_john_sees_record, logger
 from cas_logic.cas_voice import CASVoiceEngine
-
 
 # --- GLOBAL VOICE INSTANCE ---
 voice = None
@@ -170,6 +169,22 @@ def process_message(curr_int):
                 response_buffer.append("[CAS ERROR] 'commands_explained.md' file not found.")
             except Exception as e:
                 response_buffer.append(f"[CAS ERROR] Could not read help file: {e}")
+
+        elif key == "log":
+            print("  >>> [CMD] Logging to Journal")
+            if not args:
+                response_buffer.append("**[CAS LOG ERROR]** Empty log message.")
+            else:
+                success, msg = logger.write_journal(args)
+                response_buffer.append(f"**[CAS LOG]** {msg}")
+
+        elif key == "remember":
+            print("  >>> [CMD] Writing Critical Memory")
+            if not args:
+                response_buffer.append("**[CAS MEMORY ERROR]** Empty memory content.")
+            else:
+                success, msg = logger.write_critical(args)
+                response_buffer.append(f"**[CAS MEMORY]** {msg}")
 
         elif key == "stop":
             stop = True

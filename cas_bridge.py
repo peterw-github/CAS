@@ -196,7 +196,7 @@ def main():
                         elif p.startswith("SCREENSHOT|||"):
                             try:
                                 msg = p.split("SCREENSHOT|||")[1]
-                                vision.take_screenshot_to_clipboard()
+                                screen_snapshot.take_screenshot_to_clipboard()
                                 box.send_keys(Keys.CONTROL, 'v')
                                 text_buffer.append(msg)
                                 time.sleep(1.5)
@@ -208,7 +208,7 @@ def main():
                             try:
                                 msg = p.split("EYES|||")[1]
                                 # Call the new logic
-                                success = eyes.fetch_and_clipboard_eye()
+                                success = what_john_sees_snapshot.fetch_and_clipboard_eye()
                                 if success:
                                     box.send_keys(Keys.CONTROL, 'v')
                                     text_buffer.append(msg)
